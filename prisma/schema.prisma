@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TargetType {
+  USER
+  INFORMATION
+  MENU_ITEM
+  EMOTION
+  TRACKER_ENTRY
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  email          String         @unique @db.VarChar(255)
+  password       String         @db.VarChar(255)
+  firstName      String         @map("first_name") @db.VarChar(255)
+  lastName       String         @map("last_name") @db.VarChar(255)
+  role           Role           @default(USER)
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at")
+
+  trackerEntries TrackerEntry[]
+  auditLogs      AuditLog[]     @relation("AdminAuditLogs")
+
+  @@map("users")
+}
+
+model Information {
+  id          Int        @id @default(autoincrement())
+  title       String     @db.VarChar(255)
+  content     String     @db.Text
+  slug        String     @unique @db.VarChar(255)
+  isPublished Boolean    @default(false) @map("is_published")
+  sortOrder   Int        @map("sort_order")
+
+  menuItems   MenuItem[]
+
+  @@index([sortOrder])
+  @@map("informations")
+}
+
+model MenuItem {
+  id            Int          @id @default(autoincrement())
+  label         String       @db.VarChar(255)
+  url           String?      @db.VarChar(2048)
+  informationId Int?         @map("information_id")
+  sortOrder     Int          @map("sort_order")
+
+  information   Information? @relation(fields: [informationId], references: [id], onDelete: SetNull)
+
+  @@index([informationId])
+  @@index([sortOrder])
+  @@map("menu_items")
+}
+
+model Emotion {
+  id          Int            @id @default(autoincrement())
+  label       String         @db.VarChar(255)
+  level       Int
+  parentId    Int?           @map("parent_id")
+  color       String         @db.VarChar(50)
+  iconPath    String         @map("icon_path") @db.VarChar(1024)
+
+  parent      Emotion?       @relation("EmotionHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Emotion[]      @relation("EmotionHierarchy")
+  trackerLogs TrackerEntry[]
+
+  @@index([parentId])
+  @@index([level])
+  @@map("emotions")
+}
+
+model TrackerEntry {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  emotionId Int       @map("emotion_id")
+  note      String?   @db.Text
+  dateEntry DateTime  @map("date_entry") @db.Date
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emotion   Emotion   @relation(fields: [emotionId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, dateEntry])
+  @@index([emotionId])
+  @@index([dateEntry])
+  @@map("tracker_entries")
+}
+
+model AuditLog {
+  id         Int        @id @default(autoincrement())
+  adminId    Int        @map("admin_id")
+  action     String     @db.VarChar(255)
+  targetType TargetType @map("target_type")
+  targetId   Int        @map("target_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
+
+  admin      User       @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Restrict)
+
+  @@index([adminId])
+  @@index([targetType, targetId])
+  @@map("audit_log")
+}
