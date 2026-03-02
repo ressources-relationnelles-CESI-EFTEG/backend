@@ -6,108 +6,256 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  USER
-  ADMIN
+enum StatutUtilisateur {
+  ACTIF    @map("actif")
+  INACTIF  @map("inactif")
+  SUSPENDU @map("suspendu")
 }
 
-enum TargetType {
-  USER
-  INFORMATION
-  MENU_ITEM
-  EMOTION
-  TRACKER_ENTRY
+enum RoleUtilisateur {
+  CITOYEN       @map("citoyen")
+  MODERATEUR    @map("moderateur")
+  ADMINISTRATEUR @map("administrateur")
+  SUPER_ADMIN   @map("super_admin")
 }
 
-model User {
-  id             Int            @id @default(autoincrement())
-  email          String         @unique @db.VarChar(255)
-  password       String         @db.VarChar(255)
-  firstName      String         @map("first_name") @db.VarChar(255)
-  lastName       String         @map("last_name") @db.VarChar(255)
-  role           Role           @default(USER)
-  isActive       Boolean        @default(true) @map("is_active")
-  createdAt      DateTime       @default(now()) @map("created_at")
-
-  trackerEntries TrackerEntry[]
-  auditLogs      AuditLog[]     @relation("AdminAuditLogs")
-
-  @@map("users")
+enum TypeRessource {
+  ARTICLE  @map("article")
+  VIDEO    @map("video")
+  AUDIO    @map("audio")
+  EXERCICE @map("exercice")
+  ACTIVITE @map("activite")
+  JEU      @map("jeu")
 }
 
-model Information {
-  id          Int        @id @default(autoincrement())
-  title       String     @db.VarChar(255)
-  content     String     @db.Text
-  slug        String     @unique @db.VarChar(255)
-  isPublished Boolean    @default(false) @map("is_published")
-  sortOrder   Int        @map("sort_order")
-
-  menuItems   MenuItem[]
-
-  @@index([sortOrder])
-  @@map("informations")
+enum TypeRelation {
+  FAMILLE      @map("famille")
+  COUPLE       @map("couple")
+  AMITIE       @map("amitie")
+  PROFESSIONNEL @map("professionnel")
+  COMMUNAUTAIRE @map("communautaire")
 }
 
-model MenuItem {
-  id            Int          @id @default(autoincrement())
-  label         String       @db.VarChar(255)
-  url           String?      @db.VarChar(2048)
-  informationId Int?         @map("information_id")
-  sortOrder     Int          @map("sort_order")
-
-  information   Information? @relation(fields: [informationId], references: [id], onDelete: SetNull)
-
-  @@index([informationId])
-  @@index([sortOrder])
-  @@map("menu_items")
+enum NiveauDifficulte {
+  DEBUTANT     @map("debutant")
+  INTERMEDIAIRE @map("intermediaire")
+  AVANCE       @map("avance")
 }
 
-model Emotion {
-  id          Int            @id @default(autoincrement())
-  label       String         @db.VarChar(255)
-  level       Int
-  parentId    Int?           @map("parent_id")
-  color       String         @db.VarChar(50)
-  iconPath    String         @map("icon_path") @db.VarChar(1024)
-
-  parent      Emotion?       @relation("EmotionHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Emotion[]      @relation("EmotionHierarchy")
-  trackerLogs TrackerEntry[]
-
-  @@index([parentId])
-  @@index([level])
-  @@map("emotions")
+enum VisibiliteRessource {
+  PRIVEE   @map("privee")
+  PARTAGEE @map("partagee")
+  PUBLIQUE @map("publique")
 }
 
-model TrackerEntry {
-  id        Int       @id @default(autoincrement())
-  userId    Int       @map("user_id")
-  emotionId Int       @map("emotion_id")
-  note      String?   @db.Text
-  dateEntry DateTime  @map("date_entry") @db.Date
-  createdAt DateTime  @default(now()) @map("created_at")
-
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  emotion   Emotion   @relation(fields: [emotionId], references: [id], onDelete: Restrict)
-
-  @@unique([userId, dateEntry])
-  @@index([emotionId])
-  @@index([dateEntry])
-  @@map("tracker_entries")
+enum StatutRessource {
+  BROUILLON  @map("brouillon")
+  EN_ATTENTE @map("en_attente")
+  VALIDEE    @map("validee")
+  REJETEE    @map("rejetee")
 }
 
-model AuditLog {
-  id         Int        @id @default(autoincrement())
-  adminId    Int        @map("admin_id")
-  action     String     @db.VarChar(255)
-  targetType TargetType @map("target_type")
-  targetId   Int        @map("target_id")
-  createdAt  DateTime   @default(now()) @map("created_at")
+enum StatutCommentaire {
+  VISIBLE @map("visible")
+  MASQUE  @map("masque")
+  SUPPRIME @map("supprime")
+}
 
-  admin      User       @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Restrict)
+enum TypeProgression {
+  EXPLOITEE    @map("exploitee")
+  MISE_DE_COTE @map("mise_de_cote")
+}
 
-  @@index([adminId])
-  @@index([targetType, targetId])
-  @@map("audit_log")
+enum TypeSignalement {
+  RESSOURCE  @map("ressource")
+  COMMENTAIRE @map("commentaire")
+}
+
+enum StatutSignalement {
+  EN_ATTENTE @map("en_attente")
+  TRAITE     @map("traite")
+  IGNORE     @map("ignore")
+}
+
+enum StatutAmi {
+  EN_ATTENTE @map("en_attente")
+  ACCEPTE    @map("accepte")
+  REFUSE     @map("refuse")
+}
+
+model Utilisateur {
+  idUtilisateur   Int               @id @default(autoincrement()) @map("id_utilisateur")
+  nom             String?           @db.VarChar(100)
+  prenom          String?           @db.VarChar(100)
+  email           String            @unique @db.VarChar(255)
+  motDePasse      String?           @map("mot_de_passe") @db.VarChar(255)
+  dateNaissance   DateTime?         @map("date_naissance") @db.Date
+  dateCreation    DateTime          @default(now()) @map("date_creation")
+  franceConnectId String?           @unique @map("france_connect_id") @db.VarChar(255)
+  statut          StatutUtilisateur @default(ACTIF)
+  role            RoleUtilisateur   @default(CITOYEN)
+
+  ressources      Ressource[]
+  commentaires    Commentaire[]
+  favoris         Favori[]
+  progressions    Progression[]
+  signalements    Signalement[]     @relation("SignalementAuteur")
+  signalementsModeration Signalement[] @relation("SignalementModerateur")
+  amitiesEnvoyees Ami[]             @relation("AmiUtilisateur1")
+  amitiesRecues   Ami[]             @relation("AmiUtilisateur2")
+
+  @@map("utilisateur")
+}
+
+model Categorie {
+  idCategorie Int         @id @default(autoincrement()) @map("id_categorie")
+  nom         String      @db.VarChar(100)
+  description String?     @db.Text
+  parentId    Int?        @map("parent_id")
+
+  parent      Categorie?  @relation("CategorieHierarchy", fields: [parentId], references: [idCategorie], onDelete: SetNull)
+  enfants     Categorie[] @relation("CategorieHierarchy")
+  ressources  Ressource[]
+
+  @@map("categorie")
+}
+
+model Ressource {
+  idRessource      Int                @id @default(autoincrement()) @map("id_ressource")
+  idUtilisateur    Int                @map("id_utilisateur")
+  idCategorie      Int                @map("id_categorie")
+  titre            String             @db.VarChar(255)
+  description      String?            @db.Text
+  contenu          String             @db.Text
+  typeRessource    TypeRessource?     @map("type_ressource")
+  typeRelation     TypeRelation?      @map("type_relation")
+  niveauDifficulte NiveauDifficulte?  @map("niveau_difficulte")
+  visibilite       VisibiliteRessource @default(PRIVEE)
+  lienPartage      String?            @unique @map("lien_partage") @db.VarChar(255)
+  dateCreation     DateTime           @default(now()) @map("date_creation")
+  dateModification DateTime?          @map("date_modification")
+  statut           StatutRessource    @default(BROUILLON)
+  motifRejet       String?            @map("motif_rejet") @db.Text
+  nombreVues       Int                @default(0) @map("nombre_vues")
+
+  utilisateur      Utilisateur        @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Restrict)
+  categorie        Categorie          @relation(fields: [idCategorie], references: [idCategorie], onDelete: Restrict)
+  tags             RessourceTag[]
+  commentaires     Commentaire[]
+  favoris          Favori[]
+  progressions     Progression[]
+  signalements     Signalement[]
+
+  @@index([idUtilisateur])
+  @@index([idCategorie])
+  @@map("ressource")
+}
+
+model Tag {
+  idTag Int           @id @default(autoincrement()) @map("id_tag")
+  nom   String        @unique @db.VarChar(50)
+
+  ressources RessourceTag[]
+
+  @@map("tag")
+}
+
+model RessourceTag {
+  idRessource Int       @map("id_ressource")
+  idTag       Int       @map("id_tag")
+
+  ressource   Ressource @relation(fields: [idRessource], references: [idRessource], onDelete: Cascade)
+  tag         Tag       @relation(fields: [idTag], references: [idTag], onDelete: Cascade)
+
+  @@id([idRessource, idTag])
+  @@map("ressource_tag")
+}
+
+model Commentaire {
+  idCommentaire       Int                @id @default(autoincrement()) @map("id_commentaire")
+  idUtilisateur       Int                @map("id_utilisateur")
+  idRessource         Int                @map("id_ressource")
+  idCommentaireParent Int?               @map("id_commentaire_parent")
+  contenu             String             @db.Text
+  dateCreation        DateTime           @default(now()) @map("date_creation")
+  dateModification    DateTime?          @map("date_modification")
+  statut              StatutCommentaire  @default(VISIBLE)
+
+  utilisateur         Utilisateur        @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Restrict)
+  ressource           Ressource          @relation(fields: [idRessource], references: [idRessource], onDelete: Cascade)
+  parent              Commentaire?       @relation("CommentaireHierarchy", fields: [idCommentaireParent], references: [idCommentaire], onDelete: SetNull)
+  reponses            Commentaire[]      @relation("CommentaireHierarchy")
+  signalements        Signalement[]
+
+  @@index([idUtilisateur])
+  @@index([idRessource])
+  @@index([idCommentaireParent])
+  @@map("commentaire")
+}
+
+model Favori {
+  idUtilisateur Int        @map("id_utilisateur")
+  idRessource   Int        @map("id_ressource")
+  dateAjout     DateTime   @default(now()) @map("date_ajout")
+
+  utilisateur   Utilisateur @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade)
+  ressource     Ressource   @relation(fields: [idRessource], references: [idRessource], onDelete: Cascade)
+
+  @@id([idUtilisateur, idRessource])
+  @@map("favori")
+}
+
+model Progression {
+  idProgression   Int             @id @default(autoincrement()) @map("id_progression")
+  idUtilisateur   Int             @map("id_utilisateur")
+  idRessource     Int             @map("id_ressource")
+  typeProgression TypeProgression @map("type_progression")
+  dateAjout       DateTime        @default(now()) @map("date_ajout")
+  rappelJours     Int?            @map("rappel_jours")
+
+  utilisateur     Utilisateur     @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade)
+  ressource       Ressource       @relation(fields: [idRessource], references: [idRessource], onDelete: Cascade)
+
+  @@unique([idUtilisateur, idRessource, typeProgression])
+  @@index([idUtilisateur])
+  @@index([idRessource])
+  @@map("progression")
+}
+
+model Signalement {
+  idSignalement    Int               @id @default(autoincrement()) @map("id_signalement")
+  idUtilisateur    Int               @map("id_utilisateur")
+  typeSignalement  TypeSignalement   @map("type_signalement")
+  idRessource      Int?              @map("id_ressource")
+  idCommentaire    Int?              @map("id_commentaire")
+  motif            String            @db.Text
+  dateCreation     DateTime          @default(now()) @map("date_creation")
+  statut           StatutSignalement @default(EN_ATTENTE)
+  idModerateur     Int?              @map("id_moderateur")
+  actionPrise      String?           @map("action_prise") @db.VarChar(100)
+  dateTraitement   DateTime?         @map("date_traitement")
+
+  utilisateur      Utilisateur       @relation("SignalementAuteur", fields: [idUtilisateur], references: [idUtilisateur], onDelete: Restrict)
+  ressource        Ressource?        @relation(fields: [idRessource], references: [idRessource], onDelete: SetNull)
+  commentaire      Commentaire?      @relation(fields: [idCommentaire], references: [idCommentaire], onDelete: SetNull)
+  moderateur       Utilisateur?      @relation("SignalementModerateur", fields: [idModerateur], references: [idUtilisateur], onDelete: SetNull)
+
+  @@index([idUtilisateur])
+  @@index([idRessource])
+  @@index([idCommentaire])
+  @@index([idModerateur])
+  @@map("signalement")
+}
+
+model Ami {
+  idUtilisateur1 Int       @map("id_utilisateur1")
+  idUtilisateur2 Int       @map("id_utilisateur2")
+  dateCreation   DateTime  @default(now()) @map("date_creation")
+  statut         StatutAmi @default(EN_ATTENTE)
+
+  utilisateur1   Utilisateur @relation("AmiUtilisateur1", fields: [idUtilisateur1], references: [idUtilisateur], onDelete: Cascade)
+  utilisateur2   Utilisateur @relation("AmiUtilisateur2", fields: [idUtilisateur2], references: [idUtilisateur], onDelete: Cascade)
+
+  @@id([idUtilisateur1, idUtilisateur2])
+  @@map("ami")
 }
