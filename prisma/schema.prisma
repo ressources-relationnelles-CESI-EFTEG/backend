@@ -103,6 +103,8 @@ model Utilisateur {
   signalementsModeration Signalement[] @relation("SignalementModerateur")
   amitiesEnvoyees Ami[]             @relation("AmiUtilisateur1")
   amitiesRecues   Ami[]             @relation("AmiUtilisateur2")
+  conversations   ParticipantConversation[]
+  messages        Message[]
 
   @@map("utilisateur")
 }
@@ -245,6 +247,45 @@ model Signalement {
   @@index([idCommentaire])
   @@index([idModerateur])
   @@map("signalement")
+}
+
+model Conversation {
+  idConversation Int      @id @default(autoincrement()) @map("id_conversation")
+  dateCreation   DateTime @default(now()) @map("date_creation")
+
+  participants   ParticipantConversation[]
+  messages       Message[]
+
+  @@map("conversation")
+}
+
+model ParticipantConversation {
+  idConversation Int      @map("id_conversation")
+  idUtilisateur  Int      @map("id_utilisateur")
+  dateAjout      DateTime @default(now()) @map("date_ajout")
+
+  conversation   Conversation @relation(fields: [idConversation], references: [idConversation], onDelete: Cascade)
+  utilisateur    Utilisateur  @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Cascade)
+
+  @@id([idConversation, idUtilisateur])
+  @@index([idUtilisateur])
+  @@map("participant_conversation")
+}
+
+model Message {
+  idMessage      Int       @id @default(autoincrement()) @map("id_message")
+  idConversation Int       @map("id_conversation")
+  idUtilisateur  Int       @map("id_utilisateur")
+  contenu        String    @db.Text
+  dateEnvoi      DateTime  @default(now()) @map("date_envoi")
+  lu             Boolean   @default(false)
+
+  conversation   Conversation @relation(fields: [idConversation], references: [idConversation], onDelete: Cascade)
+  utilisateur    Utilisateur  @relation(fields: [idUtilisateur], references: [idUtilisateur], onDelete: Restrict)
+
+  @@index([idConversation])
+  @@index([idUtilisateur])
+  @@map("message")
 }
 
 model Ami {
