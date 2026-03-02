@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 
 @Injectable()
 export class PrismaService
@@ -16,17 +17,8 @@ export class PrismaService
       );
     }
 
-    let PrismaPg: new (options: { connectionString: string }) => unknown;
-    try {
-      ({ PrismaPg } = require('@prisma/adapter-pg'));
-    } catch {
-      throw new Error(
-        'Missing dependency @prisma/adapter-pg. Run: npm i @prisma/adapter-pg pg',
-      );
-    }
-
     const adapter = new PrismaPg({ connectionString });
-    super({ adapter: adapter as never });
+    super({ adapter: adapter as Prisma.PrismaClientOptions['adapter'] });
   }
 
   async onModuleInit() {

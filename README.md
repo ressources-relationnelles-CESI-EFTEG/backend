@@ -18,10 +18,20 @@ npm install
 npm run db:up
 npm run prisma:generate
 npx prisma migrate deploy
+npx prisma db seed
 npm run start:dev
 ```
 
-API Nest: `http://localhost:3000`
+---Si vous avez déjà migrer une fois avec l'ancienne base il faut reset---
+```powershell
+npm run db:reset
+npm run db:up
+npx prisma migrate deploy
+npx prisma db seed
+npm run start:dev
+```
+
+API Nest: `http://localhost:3001`
 
 ## Base de donnees sans outil externe
 

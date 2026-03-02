@@ -6,13 +6,13 @@ services:
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
-      POSTGRES_DB: rr-cesi
+      POSTGRES_DB: rr_cesi
     ports:
-      - "5433:5432"
+      - '5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test -d test"]
+      test: ['CMD-SHELL', 'pg_isready -U test -d rr_cesi']
       interval: 5s
       timeout: 5s
       retries: 10

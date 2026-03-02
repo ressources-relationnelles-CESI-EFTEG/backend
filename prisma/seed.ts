@@ -1,6 +1,18 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient, Role, TargetType } from '@prisma/client';
+import {
+  NiveauDifficulte,
+  Prisma,
+  PrismaClient,
+  RoleUtilisateur,
+  StatutAmi,
+  StatutRessource,
+  TypeProgression,
+  TypeRelation,
+  TypeRessource,
+  TypeSignalement,
+  VisibiliteRessource,
+} from '@prisma/client';
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -8,247 +20,263 @@ if (!connectionString) {
 }
 
 const adapter = new PrismaPg({ connectionString });
-const prisma = new PrismaClient({ adapter: adapter as never });
+const prisma = new PrismaClient({
+  adapter: adapter as Prisma.PrismaClientOptions['adapter'],
+});
 
 async function main() {
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@cesizen.local' },
-    update: {
-      firstName: 'Admin',
-      lastName: 'Cesizen',
-      role: Role.ADMIN,
-      isActive: true,
-    },
-    create: {
-      email: 'admin@cesizen.local',
-      password: '$2b$10$wA61lQx7ek6f0m4Y2leJQeqlY8i3o6e9mU8Vd8iJv8Rk0m8eK8N7S',
-      firstName: 'Admin',
-      lastName: 'Cesizen',
-      role: Role.ADMIN,
+  await prisma.signalement.deleteMany();
+  await prisma.progression.deleteMany();
+  await prisma.favori.deleteMany();
+  await prisma.commentaire.deleteMany();
+  await prisma.ressourceTag.deleteMany();
+  await prisma.ami.deleteMany();
+  await prisma.ressource.deleteMany();
+  await prisma.tag.deleteMany();
+  await prisma.categorie.deleteMany();
+  await prisma.utilisateur.deleteMany();
+
+  const superAdmin = await prisma.utilisateur.create({
+    data: {
+      email: 'superadmin@rr.local',
+      motDePasse: 'Password123!',
+      nom: 'Ressources',
+      prenom: 'Admin',
+      role: RoleUtilisateur.SUPER_ADMIN,
+      franceConnectId: 'fc-superadmin-rr',
     },
   });
 
-  const user = await prisma.user.upsert({
-    where: { email: 'alice@cesizen.local' },
-    update: {
-      firstName: 'Alice',
-      lastName: 'Martin',
-      role: Role.USER,
-      isActive: true,
-    },
-    create: {
-      email: 'alice@cesizen.local',
-      password: '$2b$10$wA61lQx7ek6f0m4Y2leJQeqlY8i3o6e9mU8Vd8iJv8Rk0m8eK8N7S',
-      firstName: 'Alice',
-      lastName: 'Martin',
-      role: Role.USER,
+  const moderateur = await prisma.utilisateur.create({
+    data: {
+      email: 'moderateur@rr.local',
+      motDePasse: 'Password123!',
+      nom: 'Dupont',
+      prenom: 'Camille',
+      role: RoleUtilisateur.MODERATEUR,
+      dateNaissance: new Date('1992-07-10'),
+      franceConnectId: 'fc-modo-rr',
     },
   });
 
-  const breathing = await prisma.information.upsert({
-    where: { slug: 'respiration-anti-stress' },
-    update: {
-      title: 'Respiration anti-stress',
-      content:
-        'Exercice simple: inspire 4 secondes, bloque 4 secondes, expire 6 secondes pendant 3 a 5 minutes.',
-      isPublished: true,
-      sortOrder: 1,
-    },
-    create: {
-      title: 'Respiration anti-stress',
-      content:
-        'Exercice simple: inspire 4 secondes, bloque 4 secondes, expire 6 secondes pendant 3 a 5 minutes.',
-      slug: 'respiration-anti-stress',
-      isPublished: true,
-      sortOrder: 1,
+  const alice = await prisma.utilisateur.create({
+    data: {
+      email: 'alice@rr.local',
+      motDePasse: 'Password123!',
+      nom: 'Martin',
+      prenom: 'Alice',
+      dateNaissance: new Date('1998-04-20'),
+      franceConnectId: 'fc-alice-rr',
     },
   });
 
-  const sleep = await prisma.information.upsert({
-    where: { slug: 'hygiene-du-sommeil' },
-    update: {
-      title: 'Hygiene du sommeil',
-      content:
-        'Couche-toi a heure reguliere, evite les ecrans 1h avant de dormir et reduis la cafeine apres 16h.',
-      isPublished: true,
-      sortOrder: 2,
-    },
-    create: {
-      title: 'Hygiene du sommeil',
-      content:
-        'Couche-toi a heure reguliere, evite les ecrans 1h avant de dormir et reduis la cafeine apres 16h.',
-      slug: 'hygiene-du-sommeil',
-      isPublished: true,
-      sortOrder: 2,
+  const bob = await prisma.utilisateur.create({
+    data: {
+      email: 'bob@rr.local',
+      motDePasse: 'Password123!',
+      nom: 'Lopez',
+      prenom: 'Bob',
+      dateNaissance: new Date('1995-11-04'),
+      franceConnectId: 'fc-bob-rr',
     },
   });
 
-  const help = await prisma.information.upsert({
-    where: { slug: 'demander-de-laide' },
-    update: {
-      title: "Demander de l'aide",
-      content:
-        "Parler a un proche, un professeur ou un professionnel est une demarche utile. En cas d'urgence, contacte le 3114.",
-      isPublished: true,
-      sortOrder: 3,
-    },
-    create: {
-      title: "Demander de l'aide",
-      content:
-        "Parler a un proche, un professeur ou un professionnel est une demarche utile. En cas d'urgence, contacte le 3114.",
-      slug: 'demander-de-laide',
-      isPublished: true,
-      sortOrder: 3,
+  const parentalite = await prisma.categorie.create({
+    data: {
+      nom: 'Parentalite',
+      description: 'Ressources pour les relations parents-enfants.',
     },
   });
 
-  await prisma.menuItem.deleteMany({
+  const couple = await prisma.categorie.create({
+    data: {
+      nom: 'Couple',
+      description: 'Communication et gestion des conflits dans le couple.',
+    },
+  });
+
+  const communication = await prisma.categorie.create({
+    data: {
+      nom: 'Communication non violente',
+      description: 'Techniques de communication pour des echanges apaises.',
+      parentId: couple.idCategorie,
+    },
+  });
+
+  await prisma.tag.createMany({
+    data: [
+      { nom: 'communication' },
+      { nom: 'ecoute' },
+      { nom: 'conflit' },
+      { nom: 'emotions' },
+      { nom: 'ado' },
+      { nom: 'couple' },
+    ],
+  });
+
+  const tags = await prisma.tag.findMany({
     where: {
-      label: {
-        in: [
-          'Respiration',
-          'Sommeil',
-          "Demander de l'aide",
-          '3114 - Prevention suicide',
-        ],
+      nom: {
+        in: ['communication', 'ecoute', 'conflit', 'emotions', 'ado', 'couple'],
       },
     },
+    select: { idTag: true, nom: true },
   });
 
-  await prisma.menuItem.createMany({
+  const tagByName = new Map<string, number>(
+    tags.map((tag) => [tag.nom, tag.idTag]),
+  );
+
+  const ressource1 = await prisma.ressource.create({
+    data: {
+      idUtilisateur: alice.idUtilisateur,
+      idCategorie: communication.idCategorie,
+      titre: 'Mieux parler en cas de tension',
+      description: 'Guide pratique pour structurer une conversation difficile.',
+      contenu:
+        'Commence par decrire les faits, exprime ton ressenti, formule ton besoin puis termine avec une demande concrete.',
+      typeRessource: TypeRessource.ARTICLE,
+      typeRelation: TypeRelation.COUPLE,
+      niveauDifficulte: NiveauDifficulte.DEBUTANT,
+      visibilite: VisibiliteRessource.PUBLIQUE,
+      lienPartage: 'rr-mieux-parler-tension',
+      statut: StatutRessource.VALIDEE,
+      nombreVues: 128,
+    },
+  });
+
+  const ressource2 = await prisma.ressource.create({
+    data: {
+      idUtilisateur: bob.idUtilisateur,
+      idCategorie: parentalite.idCategorie,
+      titre: 'Routine de discussion parent-ado',
+      description: 'Activite hebdomadaire en 20 minutes.',
+      contenu:
+        'Fixer un rendez-vous court, alterner les temps de parole, reformuler, puis definir une action test pour la semaine suivante.',
+      typeRessource: TypeRessource.ACTIVITE,
+      typeRelation: TypeRelation.FAMILLE,
+      niveauDifficulte: NiveauDifficulte.INTERMEDIAIRE,
+      visibilite: VisibiliteRessource.PARTAGEE,
+      lienPartage: 'rr-routine-parent-ado',
+      statut: StatutRessource.EN_ATTENTE,
+      nombreVues: 42,
+    },
+  });
+
+  const ressource3 = await prisma.ressource.create({
+    data: {
+      idUtilisateur: alice.idUtilisateur,
+      idCategorie: couple.idCategorie,
+      titre: 'Exercice de desescalade emotionnelle',
+      description: 'Audio court pour revenir a un echange constructif.',
+      contenu:
+        'Respiration guidee 4-6, pause de 10 minutes, reprise avec reformulation des besoins de chacun.',
+      typeRessource: TypeRessource.AUDIO,
+      typeRelation: TypeRelation.COUPLE,
+      niveauDifficulte: NiveauDifficulte.DEBUTANT,
+      visibilite: VisibiliteRessource.PRIVEE,
+      statut: StatutRessource.BROUILLON,
+      nombreVues: 5,
+    },
+  });
+
+  await prisma.ressourceTag.createMany({
     data: [
-      { label: 'Respiration', sortOrder: 1, informationId: breathing.id },
-      { label: 'Sommeil', sortOrder: 2, informationId: sleep.id },
-      { label: "Demander de l'aide", sortOrder: 3, informationId: help.id },
       {
-        label: '3114 - Prevention suicide',
-        sortOrder: 4,
-        url: 'https://www.3114.fr/',
+        idRessource: ressource1.idRessource,
+        idTag: tagByName.get('communication')!,
+      },
+      { idRessource: ressource1.idRessource, idTag: tagByName.get('conflit')! },
+      { idRessource: ressource1.idRessource, idTag: tagByName.get('couple')! },
+      { idRessource: ressource2.idRessource, idTag: tagByName.get('ecoute')! },
+      { idRessource: ressource2.idRessource, idTag: tagByName.get('ado')! },
+      {
+        idRessource: ressource3.idRessource,
+        idTag: tagByName.get('emotions')!,
       },
     ],
   });
 
-  const ensureEmotion = async (
-    label: string,
-    level: number,
-    color: string,
-    iconPath: string,
-    parentId: number | null = null,
-  ) => {
-    const existing = await prisma.emotion.findFirst({
-      where: { label, level, parentId },
-      select: { id: true },
-    });
-    if (existing) return existing;
-    return prisma.emotion.create({
-      data: { label, level, color, iconPath, parentId },
-      select: { id: true },
-    });
-  };
-
-  const joy = await ensureEmotion('Joie', 1, '#F4C542', '/icons/joie.svg');
-  const sadness = await ensureEmotion(
-    'Tristesse',
-    1,
-    '#4A90E2',
-    '/icons/tristesse.svg',
-  );
-  const anger = await ensureEmotion(
-    'Colere',
-    1,
-    '#E94E4E',
-    '/icons/colere.svg',
-  );
-  const fear = await ensureEmotion('Peur', 1, '#7E57C2', '/icons/peur.svg');
-
-  await ensureEmotion('Serein', 2, '#F7D97A', '/icons/serein.svg', joy.id);
-  await ensureEmotion('Fier', 2, '#E9B949', '/icons/fier.svg', joy.id);
-  await ensureEmotion(
-    'Decourage',
-    2,
-    '#6FA8DC',
-    '/icons/decourage.svg',
-    sadness.id,
-  );
-  await ensureEmotion('Seul', 2, '#5A8AC6', '/icons/seul.svg', sadness.id);
-  await ensureEmotion('Frustre', 2, '#D64545', '/icons/frustre.svg', anger.id);
-  await ensureEmotion('Irrite', 2, '#C03A3A', '/icons/irrite.svg', anger.id);
-  await ensureEmotion('Inquiet', 2, '#8E6BC9', '/icons/inquiet.svg', fear.id);
-  await ensureEmotion('Stress', 2, '#7353BA', '/icons/stress.svg', fear.id);
-
-  const serene = await prisma.emotion.findFirstOrThrow({
-    where: { label: 'Serein', level: 2, parentId: joy.id },
-    select: { id: true },
-  });
-  const worried = await prisma.emotion.findFirstOrThrow({
-    where: { label: 'Inquiet', level: 2, parentId: fear.id },
-    select: { id: true },
+  const commentaire1 = await prisma.commentaire.create({
+    data: {
+      idUtilisateur: bob.idUtilisateur,
+      idRessource: ressource1.idRessource,
+      contenu:
+        'Article clair, les exemples m ont aide a mieux formuler mes demandes.',
+    },
   });
 
-  await prisma.trackerEntry.upsert({
-    where: {
-      userId_dateEntry: {
-        userId: user.id,
-        dateEntry: new Date('2026-02-18'),
+  await prisma.commentaire.create({
+    data: {
+      idUtilisateur: alice.idUtilisateur,
+      idRessource: ressource1.idRessource,
+      idCommentaireParent: commentaire1.idCommentaire,
+      contenu: 'Merci pour ton retour, je vais ajouter une fiche resume.',
+    },
+  });
+
+  await prisma.favori.createMany({
+    data: [
+      {
+        idUtilisateur: alice.idUtilisateur,
+        idRessource: ressource2.idRessource,
       },
-    },
-    update: {
-      emotionId: serene.id,
-      note: 'Bonne journee, je me sens posee.',
-    },
-    create: {
-      userId: user.id,
-      emotionId: serene.id,
-      note: 'Bonne journee, je me sens posee.',
-      dateEntry: new Date('2026-02-18'),
-    },
+      { idUtilisateur: bob.idUtilisateur, idRessource: ressource1.idRessource },
+    ],
   });
 
-  await prisma.trackerEntry.upsert({
-    where: {
-      userId_dateEntry: {
-        userId: user.id,
-        dateEntry: new Date('2026-02-19'),
+  await prisma.progression.createMany({
+    data: [
+      {
+        idUtilisateur: alice.idUtilisateur,
+        idRessource: ressource1.idRessource,
+        typeProgression: TypeProgression.EXPLOITEE,
       },
-    },
-    update: {
-      emotionId: worried.id,
-      note: 'Journee chargee avant rendu de projet.',
-    },
-    create: {
-      userId: user.id,
-      emotionId: worried.id,
-      note: 'Journee chargee avant rendu de projet.',
-      dateEntry: new Date('2026-02-19'),
+      {
+        idUtilisateur: alice.idUtilisateur,
+        idRessource: ressource2.idRessource,
+        typeProgression: TypeProgression.MISE_DE_COTE,
+        rappelJours: 7,
+      },
+      {
+        idUtilisateur: bob.idUtilisateur,
+        idRessource: ressource1.idRessource,
+        typeProgression: TypeProgression.MISE_DE_COTE,
+        rappelJours: 14,
+      },
+    ],
+  });
+
+  await prisma.signalement.create({
+    data: {
+      idUtilisateur: alice.idUtilisateur,
+      typeSignalement: TypeSignalement.RESSOURCE,
+      idRessource: ressource2.idRessource,
+      motif: 'Le contenu devrait citer ses sources plus explicitement.',
+      idModerateur: moderateur.idUtilisateur,
+      actionPrise: 'Demande de correction envoyee a l auteur',
+      dateTraitement: new Date('2026-03-01T09:30:00Z'),
     },
   });
 
-  const existingAudit = await prisma.auditLog.count({
-    where: { adminId: admin.id },
+  await prisma.ami.createMany({
+    data: [
+      {
+        idUtilisateur1: alice.idUtilisateur,
+        idUtilisateur2: bob.idUtilisateur,
+        statut: StatutAmi.ACCEPTE,
+      },
+      {
+        idUtilisateur1: bob.idUtilisateur,
+        idUtilisateur2: superAdmin.idUtilisateur,
+        statut: StatutAmi.EN_ATTENTE,
+      },
+    ],
   });
-
-  if (existingAudit === 0) {
-    await prisma.auditLog.createMany({
-      data: [
-        {
-          adminId: admin.id,
-          action: 'PUBLISH_INFORMATION',
-          targetType: TargetType.INFORMATION,
-          targetId: breathing.id,
-        },
-        {
-          adminId: admin.id,
-          action: 'UPDATE_INFORMATION',
-          targetType: TargetType.INFORMATION,
-          targetId: sleep.id,
-        },
-      ],
-    });
-  }
 }
 
 void main()
-  .catch((error) => {
+  .catch((error: unknown) => {
     console.error('Seed failed:', error);
     process.exitCode = 1;
   })
