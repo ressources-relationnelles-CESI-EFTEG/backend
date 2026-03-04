@@ -5,6 +5,10 @@ export interface SignedInUser {
   nom: string | null;
   prenom: string | null;
   email: string;
+  telephone: string | null;
+  description: string | null;
+  phraseAccroche: string | null;
+  region: string | null;
   role: RoleUtilisateur;
   statut: StatutUtilisateur;
   dateCreation: Date;
