@@ -1,22 +1,18 @@
-import type { RoleUtilisateur, StatutUtilisateur } from '@prisma/client';
-
-export interface SignedInUser {
-  idUtilisateur: number;
-  nom: string | null;
-  prenom: string | null;
+export interface LoginResponseUser {
+  id: number;
+  firstname: string | null;
+  lastname: string | null;
   email: string;
-  telephone: string | null;
-  description: string | null;
-  phraseAccroche: string | null;
-  region: string | null;
-  role: RoleUtilisateur;
-  statut: StatutUtilisateur;
-  dateCreation: Date;
+  role: string;
 }
 
-export interface SignInResponse {
-  data: {
-    accessToken: string;
-    user: SignedInUser;
-  };
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: LoginResponseUser;
+}
+
+export interface RegisterResponse {
+  message: string;
+  user: LoginResponseUser;
 }
