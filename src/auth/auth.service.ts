@@ -78,9 +78,8 @@ export class AuthService {
       );
     }
 
-    let utilisateur: Utilisateur;
     try {
-      utilisateur = await this.prisma.utilisateur.create({
+      const utilisateur = await this.prisma.utilisateur.create({
         data: {
           email,
           motDePasse: await this.hashPassword(password),
@@ -88,17 +87,17 @@ export class AuthService {
           nom: lastname,
         },
       });
+
+      return {
+        message: 'Compte créé avec succès',
+        user: this.toLoginUser(utilisateur),
+      };
     } catch (error: unknown) {
       if (this.isUniqueConstraintError(error)) {
         throw new ConflictException("L'email est déjà utilisé");
       }
       throw error;
     }
-
-    return {
-      message: 'Compte créé avec succès',
-      user: this.toLoginUser(utilisateur),
-    };
   }
 
   verifyToken(token: string): { userId: number; email: string } | null {
