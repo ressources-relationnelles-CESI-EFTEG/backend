@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
   BadRequestException,
@@ -22,9 +23,30 @@ import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
 export class UtilisateursController {
   constructor(private readonly utilisateursService: UtilisateursService) {}
 
+  @Get()
+  findAll(@Query('search') search?: string) {
+    return this.utilisateursService.findAll(search);
+  }
+
   @Get(':id')
   findById(@Param('id', ParseIntPipe) id: number) {
     return this.utilisateursService.findById(id);
+  }
+
+  @Patch(':id/statut')
+  updateStatut(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('statut') statut: string,
+  ) {
+    return this.utilisateursService.updateStatut(id, statut);
+  }
+
+  @Patch(':id/role')
+  updateRole(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('role') role: string,
+  ) {
+    return this.utilisateursService.updateRole(id, role);
   }
 
   @Patch(':id')
@@ -81,5 +103,10 @@ export class UtilisateursController {
     }
 
     return this.utilisateursService.update(id, { photoProfil: null as any });
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.utilisateursService.remove(id);
   }
 }
