@@ -34,4 +34,9 @@ export class UpdateUtilisateurDto {
   @IsString()
   @MaxLength(100)
   region?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  photoProfil?: string;
 }

@@ -93,6 +93,7 @@ model Utilisateur {
   description     String?           @db.Text
   phraseAccroche  String?           @map("phrase_accroche") @db.VarChar(255)
   region          String?           @db.VarChar(100)
+  photoProfil     String?           @map("photo_profil") @db.VarChar(255)
   dateNaissance   DateTime?         @map("date_naissance") @db.Date
   dateCreation    DateTime          @default(now()) @map("date_creation")
   franceConnectId String?           @unique @map("france_connect_id") @db.VarChar(255)
