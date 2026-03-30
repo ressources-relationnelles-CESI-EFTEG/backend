@@ -12,6 +12,7 @@ import {
 import { RessourcesService } from './ressources.service';
 import { CreateRessourceDto } from './dto/create-ressource.dto';
 import { UpdateRessourceDto } from './dto/update-ressource.dto';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('ressources')
 export class RessourcesController {
@@ -40,6 +41,7 @@ export class RessourcesController {
     return this.ressourcesService.create(dto);
   }
 
+  @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -48,6 +50,7 @@ export class RessourcesController {
     return this.ressourcesService.update(id, dto);
   }
 
+  @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.ressourcesService.remove(id);

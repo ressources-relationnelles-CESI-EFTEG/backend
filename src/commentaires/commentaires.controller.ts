@@ -11,6 +11,7 @@ import {
 import { CommentairesService } from './commentaires.service';
 import { CreateCommentaireDto } from './dto/create-commentaire.dto';
 import { UpdateCommentaireDto } from './dto/update-commentaire.dto';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('commentaires')
 export class CommentairesController {
@@ -31,6 +32,7 @@ export class CommentairesController {
     return this.commentairesService.create(dto);
   }
 
+  @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -39,6 +41,7 @@ export class CommentairesController {
     return this.commentairesService.update(id, dto);
   }
 
+  @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.commentairesService.remove(id);

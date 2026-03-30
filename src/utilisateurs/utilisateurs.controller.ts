@@ -18,11 +18,13 @@ import { extname, join } from 'path';
 import { unlink } from 'fs/promises';
 import { UtilisateursService } from './utilisateurs.service';
 import { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('utilisateurs')
 export class UtilisateursController {
   constructor(private readonly utilisateursService: UtilisateursService) {}
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Get()
   findAll(@Query('search') search?: string) {
     return this.utilisateursService.findAll(search);
@@ -33,6 +35,7 @@ export class UtilisateursController {
     return this.utilisateursService.findById(id);
   }
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Patch(':id/statut')
   updateStatut(
     @Param('id', ParseIntPipe) id: number,
@@ -41,6 +44,7 @@ export class UtilisateursController {
     return this.utilisateursService.updateStatut(id, statut);
   }
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Patch(':id/role')
   updateRole(
     @Param('id', ParseIntPipe) id: number,
@@ -105,6 +109,7 @@ export class UtilisateursController {
     return this.utilisateursService.update(id, { photoProfil: null as any });
   }
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.utilisateursService.remove(id);
