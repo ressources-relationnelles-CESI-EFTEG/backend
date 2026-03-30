@@ -165,6 +165,47 @@ export class AuthService {
     return `${payloadB64}.${signature}`;
   }
 
+  async createAdmin(input: RegisterDto): Promise<RegisterResponse> {
+    const firstname = input?.firstname?.trim();
+    const lastname = input?.lastname?.trim();
+    const email = input?.email?.trim().toLowerCase();
+    const password = input?.password;
+
+    if (!email || !password || !firstname || !lastname) {
+      throw new BadRequestException(
+        'Tous les champs sont requis.',
+      );
+    }
+
+    if (password.length < 8) {
+      throw new BadRequestException(
+        'Le mot de passe doit contenir au moins 8 caractères.',
+      );
+    }
+
+    try {
+      const utilisateur = await this.prisma.utilisateur.create({
+        data: {
+          email,
+          motDePasse: await this.hashPassword(password),
+          prenom: firstname,
+          nom: lastname,
+          role: 'ADMINISTRATEUR',
+        },
+      });
+
+      return {
+        message: 'Compte administrateur créé avec succès',
+        user: this.toLoginUser(utilisateur),
+      };
+    } catch (error: unknown) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException("L'email est déjà utilisé");
+      }
+      throw error;
+    }
+  }
+
   private isUniqueConstraintError(error: unknown): boolean {
     if (!error || typeof error !== 'object') {
       return false;

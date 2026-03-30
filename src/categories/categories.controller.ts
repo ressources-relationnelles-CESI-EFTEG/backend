@@ -11,6 +11,7 @@ import {
 import { CategoriesService } from './categories.service';
 import { CreateCategorieDto } from './dto/create-categorie.dto';
 import { UpdateCategorieDto } from './dto/update-categorie.dto';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('categories')
 export class CategoriesController {
@@ -26,11 +27,13 @@ export class CategoriesController {
     return this.categoriesService.findById(id);
   }
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Post()
   create(@Body() dto: CreateCategorieDto) {
     return this.categoriesService.create(dto);
   }
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -39,6 +42,7 @@ export class CategoriesController {
     return this.categoriesService.update(id, dto);
   }
 
+  @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);

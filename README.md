@@ -73,14 +73,14 @@ npx prisma db seed
 
 ### Ressources `/ressources`
 
-| Methode | Route | Description | Reponse |
-|---------|-------|-------------|---------|
-| GET | `/ressources` | Lister les ressources publiques validees (`?categorie=` pour filtrer) | `[{ idRessource, titre, description, contenu, typeRessource, typeRelation, niveauDifficulte, visibilite, statut, nombreVues, dateCreation, categorie: { idCategorie, nom }, utilisateur: { idUtilisateur, prenom, nom }, tags: [{ tag: { idTag, nom } }] }]` |
-| GET | `/ressources/:id` | Detail d'une ressource | Meme objet que ci-dessus (unitaire) |
-| GET | `/ressources/utilisateur/:id` | Ressources creees par un utilisateur (tous statuts) | Meme format (tableau) |
-| POST | `/ressources` | Creer une ressource | Ressource creee |
-| PATCH | `/ressources/:id` | Modifier une ressource | Ressource mise a jour |
-| DELETE | `/ressources/:id` | Supprimer une ressource | Ressource supprimee |
+| Methode | Route | Description | Reponse | Roles requis |
+|---------|-------|-------------|---------|--------------|
+| GET | `/ressources` | Lister les ressources publiques validees (`?categorie=` pour filtrer) | `[{ idRessource, titre, description, contenu, typeRessource, typeRelation, niveauDifficulte, visibilite, statut, nombreVues, dateCreation, categorie: { idCategorie, nom }, utilisateur: { idUtilisateur, prenom, nom }, tags: [{ tag: { idTag, nom } }] }]` | Tous |
+| GET | `/ressources/:id` | Detail d'une ressource | Meme objet que ci-dessus (unitaire) | Tous |
+| GET | `/ressources/utilisateur/:id` | Ressources creees par un utilisateur (tous statuts) | Meme format (tableau) | Tous |
+| POST | `/ressources` | Creer une ressource | Ressource creee | Authentifie |
+| PATCH | `/ressources/:id` | Modifier une ressource (moderation: valider/rejeter) | Ressource mise a jour | MODERATEUR, ADMINISTRATEUR, SUPER_ADMIN |
+| DELETE | `/ressources/:id` | Supprimer une ressource | Ressource supprimee | MODERATEUR, ADMINISTRATEUR, SUPER_ADMIN |
 
 ### Categories `/categories`
 
@@ -94,13 +94,13 @@ npx prisma db seed
 
 ### Commentaires `/commentaires`
 
-| Methode | Route | Description | Reponse |
-|---------|-------|-------------|---------|
-| GET | `/commentaires/ressource/:id` | Commentaires d'une ressource (racines avec reponses) | `[{ idCommentaire, contenu, dateCreation, statut, utilisateur: { idUtilisateur, prenom, nom }, reponses: [{ idCommentaire, contenu, utilisateur, ... }] }]` |
-| GET | `/commentaires/:id` | Detail d'un commentaire | Meme objet (unitaire) |
-| POST | `/commentaires` | Creer un commentaire ou une reponse | Commentaire cree |
-| PATCH | `/commentaires/:id` | Modifier un commentaire | Commentaire mis a jour |
-| DELETE | `/commentaires/:id` | Supprimer un commentaire | Commentaire supprime |
+| Methode | Route | Description | Reponse | Roles requis |
+|---------|-------|-------------|---------|--------------|
+| GET | `/commentaires/ressource/:id` | Commentaires d'une ressource (racines avec reponses) | `[{ idCommentaire, contenu, dateCreation, statut, utilisateur: { idUtilisateur, prenom, nom }, reponses: [{ idCommentaire, contenu, utilisateur, ... }] }]` | Tous |
+| GET | `/commentaires/:id` | Detail d'un commentaire | Meme objet (unitaire) | Tous |
+| POST | `/commentaires` | Creer un commentaire ou une reponse | Commentaire cree | Authentifie |
+| PATCH | `/commentaires/:id` | Modifier un commentaire (moderation) | Commentaire mis a jour | MODERATEUR, ADMINISTRATEUR, SUPER_ADMIN |
+| DELETE | `/commentaires/:id` | Supprimer un commentaire | Commentaire supprime | MODERATEUR, ADMINISTRATEUR, SUPER_ADMIN |
 
 ### Favoris `/favoris`
 
@@ -113,14 +113,14 @@ npx prisma db seed
 
 ### Tags `/tags`
 
-| Methode | Route | Description | Reponse |
-|---------|-------|-------------|---------|
-| GET | `/tags` | Lister tous les tags | `[{ idTag, nom }]` |
-| GET | `/tags/:id` | Detail d'un tag | `{ idTag, nom }` |
-| POST | `/tags` | Creer un tag | Tag cree |
-| DELETE | `/tags/:id` | Supprimer un tag | Tag supprime |
-| POST | `/tags/ressource/:ressourceId/:tagId` | Associer un tag a une ressource | `{ idRessource, idTag }` |
-| DELETE | `/tags/ressource/:ressourceId/:tagId` | Retirer un tag d'une ressource | Association supprimee |
+| Methode | Route | Description | Reponse | Roles requis |
+|---------|-------|-------------|---------|--------------|
+| GET | `/tags` | Lister tous les tags | `[{ idTag, nom }]` | Tous |
+| GET | `/tags/:id` | Detail d'un tag | `{ idTag, nom }` | Tous |
+| POST | `/tags` | Creer un tag | Tag cree | ADMINISTRATEUR, SUPER_ADMIN |
+| DELETE | `/tags/:id` | Supprimer un tag | Tag supprime | ADMINISTRATEUR, SUPER_ADMIN |
+| POST | `/tags/ressource/:ressourceId/:tagId` | Associer un tag a une ressource | `{ idRessource, idTag }` | ADMINISTRATEUR, SUPER_ADMIN |
+| DELETE | `/tags/ressource/:ressourceId/:tagId` | Retirer un tag d'une ressource | Association supprimee | ADMINISTRATEUR, SUPER_ADMIN |
 
 ### Signalements `/signalements`
 
