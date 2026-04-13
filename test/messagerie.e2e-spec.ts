@@ -73,7 +73,7 @@ describe('Messagerie (e2e)', () => {
   });
 
   describe('GET /messagerie/conversations/utilisateur/:id', () => {
-    it('200 — retourne les conversations de l\'utilisateur', async () => {
+    it("200 — retourne les conversations de l'utilisateur", async () => {
       const alice = await createCitoyen(prisma);
       const bob = await createCitoyen(prisma);
       await prisma.conversation.create({

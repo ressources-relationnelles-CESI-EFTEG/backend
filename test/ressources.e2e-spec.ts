@@ -44,7 +44,11 @@ describe('Ressources (e2e)', () => {
     it('200 — retourne la liste publique sans token', async () => {
       const user = await createCitoyen(prisma);
       await prisma.ressource.create({
-        data: { ...ressourcePayload(user.id), visibilite: 'PUBLIQUE', statut: 'VALIDEE' } as any,
+        data: {
+          ...ressourcePayload(user.id),
+          visibilite: 'PUBLIQUE',
+          statut: 'VALIDEE',
+        } as any,
       });
 
       const res = await http()
@@ -68,7 +72,9 @@ describe('Ressources (e2e)', () => {
   describe('GET /ressources/:id', () => {
     it('200 — retourne la ressource', async () => {
       const user = await createCitoyen(prisma);
-      const r = await prisma.ressource.create({ data: ressourcePayload(user.id) as any });
+      const r = await prisma.ressource.create({
+        data: ressourcePayload(user.id) as any,
+      });
 
       const res = await http()
         .get(`/ressources/${r.idRessource}`)
@@ -89,7 +95,7 @@ describe('Ressources (e2e)', () => {
   // ─── GET /ressources/utilisateur/:id ─────────────────────────────────────
 
   describe('GET /ressources/utilisateur/:id', () => {
-    it('200 — retourne les ressources de l\'utilisateur', async () => {
+    it("200 — retourne les ressources de l'utilisateur", async () => {
       const user = await createCitoyen(prisma);
       await prisma.ressource.create({ data: ressourcePayload(user.id) as any });
 
@@ -116,7 +122,9 @@ describe('Ressources (e2e)', () => {
 
     it('401 — creation sans token refusee', async () => {
       const user = await createCitoyen(prisma);
-      const res = await http().post('/ressources').send(ressourcePayload(user.id));
+      const res = await http()
+        .post('/ressources')
+        .send(ressourcePayload(user.id));
       expect(res.status).toBe(401);
     });
   });
@@ -127,7 +135,9 @@ describe('Ressources (e2e)', () => {
     it('200 — modification par un moderateur', async () => {
       const user = await createCitoyen(prisma);
       const mod = await createModerateur(prisma);
-      const r = await prisma.ressource.create({ data: ressourcePayload(user.id) as any });
+      const r = await prisma.ressource.create({
+        data: ressourcePayload(user.id) as any,
+      });
 
       const res = await http()
         .patch(`/ressources/${r.idRessource}`)
@@ -139,7 +149,9 @@ describe('Ressources (e2e)', () => {
 
     it('403 — modification refusee pour un CITOYEN', async () => {
       const user = await createCitoyen(prisma);
-      const r = await prisma.ressource.create({ data: ressourcePayload(user.id) as any });
+      const r = await prisma.ressource.create({
+        data: ressourcePayload(user.id) as any,
+      });
 
       const res = await http()
         .patch(`/ressources/${r.idRessource}`)
@@ -155,7 +167,9 @@ describe('Ressources (e2e)', () => {
     it('200 — suppression par un moderateur', async () => {
       const user = await createCitoyen(prisma);
       const mod = await createModerateur(prisma);
-      const r = await prisma.ressource.create({ data: ressourcePayload(user.id) as any });
+      const r = await prisma.ressource.create({
+        data: ressourcePayload(user.id) as any,
+      });
 
       const res = await http()
         .delete(`/ressources/${r.idRessource}`)
@@ -165,7 +179,9 @@ describe('Ressources (e2e)', () => {
 
     it('403 — suppression refusee pour un CITOYEN', async () => {
       const user = await createCitoyen(prisma);
-      const r = await prisma.ressource.create({ data: ressourcePayload(user.id) as any });
+      const r = await prisma.ressource.create({
+        data: ressourcePayload(user.id) as any,
+      });
 
       const res = await http()
         .delete(`/ressources/${r.idRessource}`)

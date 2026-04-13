@@ -56,7 +56,7 @@ describe('Utilisateurs (e2e)', () => {
   // ─── GET /utilisateurs/:id ────────────────────────────────────────────────
 
   describe('GET /utilisateurs/:id', () => {
-    it('200 — retourne l\'utilisateur sans motDePasse', async () => {
+    it("200 — retourne l'utilisateur sans motDePasse", async () => {
       const user = await createCitoyen(prisma);
       const res = await http()
         .get(`/utilisateurs/${user.id}`)

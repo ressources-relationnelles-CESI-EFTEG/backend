@@ -16,17 +16,19 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user as { userId: number; email: string } | undefined;
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: { userId: number; email: string } }>();
+    const user = request.user;
 
     if (!user) {
       throw new ForbiddenException('Accès refusé.');
@@ -38,7 +40,7 @@ export class RolesGuard implements CanActivate {
     });
 
     if (!utilisateur || !requiredRoles.includes(utilisateur.role)) {
-      throw new ForbiddenException('Vous n\'avez pas les droits nécessaires.');
+      throw new ForbiddenException("Vous n'avez pas les droits nécessaires.");
     }
 
     return true;

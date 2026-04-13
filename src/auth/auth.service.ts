@@ -172,9 +172,7 @@ export class AuthService {
     const password = input?.password;
 
     if (!email || !password || !firstname || !lastname) {
-      throw new BadRequestException(
-        'Tous les champs sont requis.',
-      );
+      throw new BadRequestException('Tous les champs sont requis.');
     }
 
     if (password.length < 8) {

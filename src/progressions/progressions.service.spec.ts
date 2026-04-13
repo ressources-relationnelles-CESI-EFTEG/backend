@@ -3,7 +3,11 @@ import { NotFoundException } from '@nestjs/common';
 
 import { ProgressionsService } from './progressions.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { resetFixtureIds } from '../test-utils/fixtures';
 
 const makeProgression = (overrides: any = {}) => ({
@@ -46,7 +50,7 @@ describe('ProgressionsService', () => {
       );
     });
 
-    it("filtre par type de progression si fourni", async () => {
+    it('filtre par type de progression si fourni', async () => {
       prisma.progression.findMany.mockResolvedValue([]);
 
       await service.findByUtilisateur(1, 'MISE_DE_COTE');
@@ -57,7 +61,7 @@ describe('ProgressionsService', () => {
   });
 
   describe('findById', () => {
-    it("retourne la progression si elle existe", async () => {
+    it('retourne la progression si elle existe', async () => {
       const p = makeProgression({ idProgression: 5 });
       prisma.progression.findUnique.mockResolvedValue(p);
 
@@ -66,7 +70,7 @@ describe('ProgressionsService', () => {
       expect(result.idProgression).toBe(5);
     });
 
-    it("leve NotFoundException si introuvable", async () => {
+    it('leve NotFoundException si introuvable', async () => {
       prisma.progression.findUnique.mockResolvedValue(null);
 
       await expect(service.findById(99)).rejects.toThrow(NotFoundException);
@@ -74,11 +78,15 @@ describe('ProgressionsService', () => {
   });
 
   describe('create', () => {
-    it("cree une progression et la retourne", async () => {
+    it('cree une progression et la retourne', async () => {
       const p = makeProgression();
       prisma.progression.create.mockResolvedValue(p);
 
-      const dto = { idUtilisateur: 1, idRessource: 1, typeProgression: 'EXPLOITEE' };
+      const dto = {
+        idUtilisateur: 1,
+        idRessource: 1,
+        typeProgression: 'EXPLOITEE',
+      };
       const result = await service.create(dto as any);
 
       expect(result.typeProgression).toBe('EXPLOITEE');
@@ -86,7 +94,7 @@ describe('ProgressionsService', () => {
   });
 
   describe('update', () => {
-    it("met a jour la progression si elle existe", async () => {
+    it('met a jour la progression si elle existe', async () => {
       const p = makeProgression({ idProgression: 1 });
       prisma.progression.findUnique.mockResolvedValue(p);
       const updated = { ...p, rappelJours: 7 };
@@ -100,19 +108,23 @@ describe('ProgressionsService', () => {
     it("leve NotFoundException si elle n'existe pas", async () => {
       prisma.progression.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(99, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(service.update(99, {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('remove', () => {
-    it("supprime la progression si elle existe", async () => {
+    it('supprime la progression si elle existe', async () => {
       const p = makeProgression({ idProgression: 1 });
       prisma.progression.findUnique.mockResolvedValue(p);
       prisma.progression.delete.mockResolvedValue(p);
 
       await service.remove(1);
 
-      expect(prisma.progression.delete).toHaveBeenCalledWith({ where: { idProgression: 1 } });
+      expect(prisma.progression.delete).toHaveBeenCalledWith({
+        where: { idProgression: 1 },
+      });
     });
 
     it("leve NotFoundException si elle n'existe pas", async () => {

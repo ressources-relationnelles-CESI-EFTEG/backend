@@ -48,6 +48,7 @@ export class RessourcesService {
 
   async create(dto: CreateRessourceDto) {
     return this.prisma.ressource.create({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: dto as any,
       include: this.defaultInclude,
     });
@@ -58,8 +59,9 @@ export class RessourcesService {
 
     return this.prisma.ressource.update({
       where: { idRessource: id },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: {
-        ...dto as any,
+        ...(dto as any),
         dateModification: new Date(),
       },
       include: this.defaultInclude,

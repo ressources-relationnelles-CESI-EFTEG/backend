@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { RoleUtilisateur, StatutUtilisateur } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { UpdateUtilisateurDto } from './dto/update-utilisateur.dto';
 
@@ -20,7 +21,7 @@ export class UtilisateursService {
       orderBy: { dateCreation: 'desc' },
     });
 
-    return utilisateurs.map(({ motDePasse, ...u }) => u);
+    return utilisateurs.map(({ motDePasse: _motDePasse, ...u }) => u);
   }
 
   async findById(id: number) {
@@ -32,8 +33,7 @@ export class UtilisateursService {
       throw new NotFoundException(`Utilisateur #${id} introuvable.`);
     }
 
-    const { motDePasse, ...safeUser } = utilisateur;
-    void motDePasse;
+    const { motDePasse: _motDePasse, ...safeUser } = utilisateur;
     return safeUser;
   }
 
@@ -45,8 +45,7 @@ export class UtilisateursService {
       data: dto,
     });
 
-    const { motDePasse, ...safeUser } = utilisateur;
-    void motDePasse;
+    const { motDePasse: _motDePasse, ...safeUser } = utilisateur;
     return safeUser;
   }
 
@@ -55,11 +54,10 @@ export class UtilisateursService {
 
     const utilisateur = await this.prisma.utilisateur.update({
       where: { idUtilisateur: id },
-      data: { statut: statut as any },
+      data: { statut: statut as StatutUtilisateur },
     });
 
-    const { motDePasse, ...safeUser } = utilisateur;
-    void motDePasse;
+    const { motDePasse: _motDePasse, ...safeUser } = utilisateur;
     return safeUser;
   }
 
@@ -68,11 +66,10 @@ export class UtilisateursService {
 
     const utilisateur = await this.prisma.utilisateur.update({
       where: { idUtilisateur: id },
-      data: { role: role as any },
+      data: { role: role as RoleUtilisateur },
     });
 
-    const { motDePasse, ...safeUser } = utilisateur;
-    void motDePasse;
+    const { motDePasse: _motDePasse, ...safeUser } = utilisateur;
     return safeUser;
   }
 

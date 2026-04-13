@@ -3,7 +3,11 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import { AmisService } from './amis.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { resetFixtureIds } from '../test-utils/fixtures';
 
 const makeAmi = (overrides: any = {}) => ({
@@ -36,7 +40,11 @@ describe('AmisService', () => {
 
   describe('findByUtilisateur', () => {
     it("retourne les amis acceptes avec l'ami correspondant", async () => {
-      const amiRecord = makeAmi({ idUtilisateur1: 1, idUtilisateur2: 2, statut: 'ACCEPTE' });
+      const amiRecord = makeAmi({
+        idUtilisateur1: 1,
+        idUtilisateur2: 2,
+        statut: 'ACCEPTE',
+      });
       prisma.ami.findMany.mockResolvedValue([amiRecord]);
 
       const result = await service.findByUtilisateur(1);
@@ -45,7 +53,11 @@ describe('AmisService', () => {
     });
 
     it("retourne l'utilisateur1 comme ami quand l'utilisateur est utilisateur2", async () => {
-      const amiRecord = makeAmi({ idUtilisateur1: 3, idUtilisateur2: 1, statut: 'ACCEPTE' });
+      const amiRecord = makeAmi({
+        idUtilisateur1: 3,
+        idUtilisateur2: 1,
+        statut: 'ACCEPTE',
+      });
       prisma.ami.findMany.mockResolvedValue([amiRecord]);
 
       const result = await service.findByUtilisateur(1);
@@ -53,7 +65,7 @@ describe('AmisService', () => {
       expect(result[0].ami).toEqual(amiRecord.utilisateur1);
     });
 
-    it("filtre sur statut ACCEPTE et OR des deux ids", async () => {
+    it('filtre sur statut ACCEPTE et OR des deux ids', async () => {
       prisma.ami.findMany.mockResolvedValue([]);
 
       await service.findByUtilisateur(5);
@@ -104,7 +116,7 @@ describe('AmisService', () => {
       expect(prisma.ami.create).toHaveBeenCalledTimes(1);
     });
 
-    it("leve ConflictException si une demande existe deja", async () => {
+    it('leve ConflictException si une demande existe deja', async () => {
       prisma.ami.findUnique.mockResolvedValue(makeAmi());
 
       await expect(service.envoyer(1, 2)).rejects.toThrow(ConflictException);
@@ -112,7 +124,9 @@ describe('AmisService', () => {
 
     it("normalise les ids (min/max) avant de verifier l'existence", async () => {
       prisma.ami.findUnique.mockResolvedValue(null);
-      prisma.ami.create.mockResolvedValue(makeAmi({ idUtilisateur1: 1, idUtilisateur2: 5 }));
+      prisma.ami.create.mockResolvedValue(
+        makeAmi({ idUtilisateur1: 1, idUtilisateur2: 5 }),
+      );
 
       await service.envoyer(5, 1);
 
@@ -123,7 +137,7 @@ describe('AmisService', () => {
   });
 
   describe('accepter', () => {
-    it("passe le statut a ACCEPTE", async () => {
+    it('passe le statut a ACCEPTE', async () => {
       prisma.ami.findUnique.mockResolvedValue(makeAmi());
       prisma.ami.update.mockResolvedValue(makeAmi({ statut: 'ACCEPTE' }));
 
@@ -134,7 +148,7 @@ describe('AmisService', () => {
       );
     });
 
-    it("leve NotFoundException si la demande est introuvable", async () => {
+    it('leve NotFoundException si la demande est introuvable', async () => {
       prisma.ami.findUnique.mockResolvedValue(null);
 
       await expect(service.accepter(1, 2)).rejects.toThrow(NotFoundException);
@@ -142,7 +156,7 @@ describe('AmisService', () => {
   });
 
   describe('refuser', () => {
-    it("passe le statut a REFUSE", async () => {
+    it('passe le statut a REFUSE', async () => {
       prisma.ami.findUnique.mockResolvedValue(makeAmi());
       prisma.ami.update.mockResolvedValue(makeAmi({ statut: 'REFUSE' }));
 
@@ -153,7 +167,7 @@ describe('AmisService', () => {
       );
     });
 
-    it("leve NotFoundException si la demande est introuvable", async () => {
+    it('leve NotFoundException si la demande est introuvable', async () => {
       prisma.ami.findUnique.mockResolvedValue(null);
 
       await expect(service.refuser(1, 2)).rejects.toThrow(NotFoundException);
@@ -161,7 +175,7 @@ describe('AmisService', () => {
   });
 
   describe('supprimer', () => {
-    it("supprime la relation via les ids normalises", async () => {
+    it('supprime la relation via les ids normalises', async () => {
       prisma.ami.delete.mockResolvedValue(makeAmi());
 
       await service.supprimer(5, 1);

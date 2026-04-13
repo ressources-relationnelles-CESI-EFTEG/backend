@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { genSalt, hash } from 'bcryptjs';
 import { PrismaPg } from '@prisma/adapter-pg';
 import {
   NiveauDifficulte,
@@ -25,6 +26,9 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
+  const salt = await genSalt(10);
+  const hashedPassword = await hash('Password123!', salt);
+
   await prisma.signalement.deleteMany();
   await prisma.progression.deleteMany();
   await prisma.favori.deleteMany();
@@ -39,7 +43,7 @@ async function main() {
   const superAdmin = await prisma.utilisateur.create({
     data: {
       email: 'superadmin@rr.local',
-      motDePasse: 'Password123!',
+      motDePasse: hashedPassword,
       nom: 'Ressources',
       prenom: 'Admin',
       role: RoleUtilisateur.SUPER_ADMIN,
@@ -50,7 +54,7 @@ async function main() {
   const moderateur = await prisma.utilisateur.create({
     data: {
       email: 'moderateur@rr.local',
-      motDePasse: 'Password123!',
+      motDePasse: hashedPassword,
       nom: 'Dupont',
       prenom: 'Camille',
       role: RoleUtilisateur.MODERATEUR,
@@ -62,7 +66,7 @@ async function main() {
   const alice = await prisma.utilisateur.create({
     data: {
       email: 'alice@rr.local',
-      motDePasse: 'Password123!',
+      motDePasse: hashedPassword,
       nom: 'Martin',
       prenom: 'Alice',
       dateNaissance: new Date('1998-04-20'),
@@ -73,7 +77,7 @@ async function main() {
   const bob = await prisma.utilisateur.create({
     data: {
       email: 'bob@rr.local',
-      motDePasse: 'Password123!',
+      motDePasse: hashedPassword,
       nom: 'Lopez',
       prenom: 'Bob',
       dateNaissance: new Date('1995-11-04'),

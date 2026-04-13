@@ -3,7 +3,11 @@ import { NotFoundException } from '@nestjs/common';
 
 import { RessourcesService } from './ressources.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { makeRessource, resetFixtureIds } from '../test-utils/fixtures';
 
 describe('RessourcesService', () => {
@@ -27,7 +31,7 @@ describe('RessourcesService', () => {
   // ─── findAll ─────────────────────────────────────────────────────────────────
 
   describe('findAll', () => {
-    it("retourne uniquement les ressources VALIDEE et PUBLIQUE", async () => {
+    it('retourne uniquement les ressources VALIDEE et PUBLIQUE', async () => {
       const r = makeRessource();
       prisma.ressource.findMany.mockResolvedValue([r]);
 
@@ -36,12 +40,15 @@ describe('RessourcesService', () => {
       expect(result).toHaveLength(1);
       expect(prisma.ressource.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ statut: 'VALIDEE', visibilite: 'PUBLIQUE' }),
+          where: expect.objectContaining({
+            statut: 'VALIDEE',
+            visibilite: 'PUBLIQUE',
+          }),
         }),
       );
     });
 
-    it("filtre par categorieId quand fourni", async () => {
+    it('filtre par categorieId quand fourni', async () => {
       prisma.ressource.findMany.mockResolvedValue([]);
 
       await service.findAll(3);
@@ -53,7 +60,7 @@ describe('RessourcesService', () => {
       );
     });
 
-    it("ne filtre pas par categorie quand absent", async () => {
+    it('ne filtre pas par categorie quand absent', async () => {
       prisma.ressource.findMany.mockResolvedValue([]);
 
       await service.findAll();
@@ -66,7 +73,7 @@ describe('RessourcesService', () => {
   // ─── findById ────────────────────────────────────────────────────────────────
 
   describe('findById', () => {
-    it("retourne la ressource si elle existe", async () => {
+    it('retourne la ressource si elle existe', async () => {
       const r = makeRessource({ idRessource: 5 });
       prisma.ressource.findUnique.mockResolvedValue(r);
 
@@ -75,7 +82,7 @@ describe('RessourcesService', () => {
       expect(result.idRessource).toBe(5);
     });
 
-    it("leve NotFoundException si la ressource est introuvable", async () => {
+    it('leve NotFoundException si la ressource est introuvable', async () => {
       prisma.ressource.findUnique.mockResolvedValue(null);
 
       await expect(service.findById(99)).rejects.toThrow(NotFoundException);
@@ -102,11 +109,16 @@ describe('RessourcesService', () => {
   // ─── create ──────────────────────────────────────────────────────────────────
 
   describe('create', () => {
-    it("cree une ressource et la retourne", async () => {
+    it('cree une ressource et la retourne', async () => {
       const r = makeRessource({ titre: 'Nouvelle ressource' });
       prisma.ressource.create.mockResolvedValue(r);
 
-      const dto = { titre: 'Nouvelle ressource', contenu: 'Contenu', idCategorie: 1, idUtilisateur: 1 };
+      const dto = {
+        titre: 'Nouvelle ressource',
+        contenu: 'Contenu',
+        idCategorie: 1,
+        idUtilisateur: 1,
+      };
       const result = await service.create(dto as any);
 
       expect(result.titre).toBe('Nouvelle ressource');
@@ -117,7 +129,7 @@ describe('RessourcesService', () => {
   // ─── update ──────────────────────────────────────────────────────────────────
 
   describe('update', () => {
-    it("met a jour la ressource si elle existe", async () => {
+    it('met a jour la ressource si elle existe', async () => {
       const r = makeRessource({ idRessource: 1 });
       prisma.ressource.findUnique.mockResolvedValue(r);
       const updated = { ...r, titre: 'Titre modifie' };
@@ -129,7 +141,10 @@ describe('RessourcesService', () => {
       expect(prisma.ressource.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { idRessource: 1 },
-          data: expect.objectContaining({ titre: 'Titre modifie', dateModification: expect.any(Date) }),
+          data: expect.objectContaining({
+            titre: 'Titre modifie',
+            dateModification: expect.any(Date),
+          }),
         }),
       );
     });
@@ -137,14 +152,16 @@ describe('RessourcesService', () => {
     it("leve NotFoundException si la ressource n'existe pas", async () => {
       prisma.ressource.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(99, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(service.update(99, {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   // ─── remove ──────────────────────────────────────────────────────────────────
 
   describe('remove', () => {
-    it("supprime la ressource si elle existe", async () => {
+    it('supprime la ressource si elle existe', async () => {
       const r = makeRessource({ idRessource: 1 });
       prisma.ressource.findUnique.mockResolvedValue(r);
       prisma.ressource.delete.mockResolvedValue(r);
@@ -152,7 +169,9 @@ describe('RessourcesService', () => {
       const result = await service.remove(1);
 
       expect(result.idRessource).toBe(1);
-      expect(prisma.ressource.delete).toHaveBeenCalledWith({ where: { idRessource: 1 } });
+      expect(prisma.ressource.delete).toHaveBeenCalledWith({
+        where: { idRessource: 1 },
+      });
     });
 
     it("leve NotFoundException si la ressource n'existe pas", async () => {

@@ -92,7 +92,9 @@ describe('Categories (e2e)', () => {
   describe('DELETE /categories/:id', () => {
     it('200 — admin supprime une categorie', async () => {
       const admin = await createAdmin(prisma);
-      const cat = await prisma.categorie.create({ data: { nom: 'A supprimer' } });
+      const cat = await prisma.categorie.create({
+        data: { nom: 'A supprimer' },
+      });
       const res = await http()
         .delete(`/categories/${cat.idCategorie}`)
         .set('Authorization', `Bearer ${admin.token}`);

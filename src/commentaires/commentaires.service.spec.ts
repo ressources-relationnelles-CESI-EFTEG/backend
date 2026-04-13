@@ -3,7 +3,11 @@ import { NotFoundException } from '@nestjs/common';
 
 import { CommentairesService } from './commentaires.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { resetFixtureIds } from '../test-utils/fixtures';
 
 const makeCommentaire = (overrides: any = {}) => ({
@@ -37,7 +41,7 @@ describe('CommentairesService', () => {
   });
 
   describe('findByRessource', () => {
-    it("retourne uniquement les commentaires visibles sans parent", async () => {
+    it('retourne uniquement les commentaires visibles sans parent', async () => {
       const comments = [makeCommentaire()];
       prisma.commentaire.findMany.mockResolvedValue(comments);
 
@@ -46,14 +50,18 @@ describe('CommentairesService', () => {
       expect(result).toHaveLength(1);
       expect(prisma.commentaire.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { idRessource: 1, idCommentaireParent: null, statut: 'VISIBLE' },
+          where: {
+            idRessource: 1,
+            idCommentaireParent: null,
+            statut: 'VISIBLE',
+          },
         }),
       );
     });
   });
 
   describe('findById', () => {
-    it("retourne le commentaire si il existe", async () => {
+    it('retourne le commentaire si il existe', async () => {
       const c = makeCommentaire({ idCommentaire: 3 });
       prisma.commentaire.findUnique.mockResolvedValue(c);
 
@@ -62,7 +70,7 @@ describe('CommentairesService', () => {
       expect(result.idCommentaire).toBe(3);
     });
 
-    it("leve NotFoundException si le commentaire est introuvable", async () => {
+    it('leve NotFoundException si le commentaire est introuvable', async () => {
       prisma.commentaire.findUnique.mockResolvedValue(null);
 
       await expect(service.findById(99)).rejects.toThrow(NotFoundException);
@@ -70,11 +78,15 @@ describe('CommentairesService', () => {
   });
 
   describe('create', () => {
-    it("cree un commentaire et le retourne", async () => {
+    it('cree un commentaire et le retourne', async () => {
       const c = makeCommentaire({ contenu: 'Nouveau commentaire' });
       prisma.commentaire.create.mockResolvedValue(c);
 
-      const dto = { idUtilisateur: 1, idRessource: 1, contenu: 'Nouveau commentaire' };
+      const dto = {
+        idUtilisateur: 1,
+        idRessource: 1,
+        contenu: 'Nouveau commentaire',
+      };
       const result = await service.create(dto as any);
 
       expect(result.contenu).toBe('Nouveau commentaire');
@@ -82,7 +94,7 @@ describe('CommentairesService', () => {
   });
 
   describe('update', () => {
-    it("met a jour le contenu et ajoute dateModification", async () => {
+    it('met a jour le contenu et ajoute dateModification', async () => {
       const c = makeCommentaire({ idCommentaire: 1 });
       prisma.commentaire.findUnique.mockResolvedValue(c);
       const updated = { ...c, contenu: 'Modifie' };
@@ -92,7 +104,10 @@ describe('CommentairesService', () => {
 
       expect(prisma.commentaire.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ contenu: 'Modifie', dateModification: expect.any(Date) }),
+          data: expect.objectContaining({
+            contenu: 'Modifie',
+            dateModification: expect.any(Date),
+          }),
         }),
       );
       expect(result.contenu).toBe('Modifie');
@@ -101,19 +116,23 @@ describe('CommentairesService', () => {
     it("leve NotFoundException si le commentaire n'existe pas", async () => {
       prisma.commentaire.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(99, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(service.update(99, {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('remove', () => {
-    it("supprime le commentaire si il existe", async () => {
+    it('supprime le commentaire si il existe', async () => {
       const c = makeCommentaire({ idCommentaire: 1 });
       prisma.commentaire.findUnique.mockResolvedValue(c);
       prisma.commentaire.delete.mockResolvedValue(c);
 
       await service.remove(1);
 
-      expect(prisma.commentaire.delete).toHaveBeenCalledWith({ where: { idCommentaire: 1 } });
+      expect(prisma.commentaire.delete).toHaveBeenCalledWith({
+        where: { idCommentaire: 1 },
+      });
     });
 
     it("leve NotFoundException si le commentaire n'existe pas", async () => {

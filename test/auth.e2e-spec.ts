@@ -2,7 +2,12 @@ import request from 'supertest';
 import { INestApplication } from '@nestjs/common';
 import { createTestApp, truncateAll } from './helpers/e2e.helper';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { createCitoyen, createSuperAdmin, DEFAULT_PASSWORD, buildToken } from './helpers/auth.helper';
+import {
+  createCitoyen,
+  createSuperAdmin,
+  DEFAULT_PASSWORD,
+  buildToken,
+} from './helpers/auth.helper';
 
 describe('Auth (e2e)', () => {
   let app: INestApplication;
