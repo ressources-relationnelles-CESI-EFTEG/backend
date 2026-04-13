@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -54,14 +58,24 @@ export class AmisService {
   }
 
   async envoyer(idUtilisateur1: number, idUtilisateur2: number) {
-    const [id1, id2] = [Math.min(idUtilisateur1, idUtilisateur2), Math.max(idUtilisateur1, idUtilisateur2)];
+    const [id1, id2] = [
+      Math.min(idUtilisateur1, idUtilisateur2),
+      Math.max(idUtilisateur1, idUtilisateur2),
+    ];
 
     const existing = await this.prisma.ami.findUnique({
-      where: { idUtilisateur1_idUtilisateur2: { idUtilisateur1: id1, idUtilisateur2: id2 } },
+      where: {
+        idUtilisateur1_idUtilisateur2: {
+          idUtilisateur1: id1,
+          idUtilisateur2: id2,
+        },
+      },
     });
 
     if (existing) {
-      throw new ConflictException('Une demande existe déjà entre ces utilisateurs.');
+      throw new ConflictException(
+        'Une demande existe déjà entre ces utilisateurs.',
+      );
     }
 
     return this.prisma.ami.create({
@@ -76,7 +90,9 @@ export class AmisService {
     await this.findDemande(idUtilisateur1, idUtilisateur2);
 
     return this.prisma.ami.update({
-      where: { idUtilisateur1_idUtilisateur2: { idUtilisateur1, idUtilisateur2 } },
+      where: {
+        idUtilisateur1_idUtilisateur2: { idUtilisateur1, idUtilisateur2 },
+      },
       data: { statut: 'ACCEPTE' },
     });
   }
@@ -85,22 +101,34 @@ export class AmisService {
     await this.findDemande(idUtilisateur1, idUtilisateur2);
 
     return this.prisma.ami.update({
-      where: { idUtilisateur1_idUtilisateur2: { idUtilisateur1, idUtilisateur2 } },
+      where: {
+        idUtilisateur1_idUtilisateur2: { idUtilisateur1, idUtilisateur2 },
+      },
       data: { statut: 'REFUSE' },
     });
   }
 
   async supprimer(idUtilisateur1: number, idUtilisateur2: number) {
-    const [id1, id2] = [Math.min(idUtilisateur1, idUtilisateur2), Math.max(idUtilisateur1, idUtilisateur2)];
+    const [id1, id2] = [
+      Math.min(idUtilisateur1, idUtilisateur2),
+      Math.max(idUtilisateur1, idUtilisateur2),
+    ];
 
     return this.prisma.ami.delete({
-      where: { idUtilisateur1_idUtilisateur2: { idUtilisateur1: id1, idUtilisateur2: id2 } },
+      where: {
+        idUtilisateur1_idUtilisateur2: {
+          idUtilisateur1: id1,
+          idUtilisateur2: id2,
+        },
+      },
     });
   }
 
   private async findDemande(idUtilisateur1: number, idUtilisateur2: number) {
     const demande = await this.prisma.ami.findUnique({
-      where: { idUtilisateur1_idUtilisateur2: { idUtilisateur1, idUtilisateur2 } },
+      where: {
+        idUtilisateur1_idUtilisateur2: { idUtilisateur1, idUtilisateur2 },
+      },
     });
 
     if (!demande) {

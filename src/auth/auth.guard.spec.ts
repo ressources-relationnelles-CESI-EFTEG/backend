@@ -44,14 +44,14 @@ describe('AuthGuard', () => {
 
   afterEach(() => jest.restoreAllMocks());
 
-  it("laisse passer une route marquee @Public() sans verifier le token", () => {
+  it('laisse passer une route marquee @Public() sans verifier le token', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(true);
     const ctx = makeContext(undefined);
 
     expect(guard.canActivate(ctx)).toBe(true);
   });
 
-  it("leve UnauthorizedException si le header Authorization est absent", () => {
+  it('leve UnauthorizedException si le header Authorization est absent', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
     const ctx = makeContext(undefined);
 
@@ -65,7 +65,7 @@ describe('AuthGuard', () => {
     expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
   });
 
-  it("leve UnauthorizedException si le token est invalide", () => {
+  it('leve UnauthorizedException si le token est invalide', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
     jest.spyOn(authService, 'verifyToken').mockReturnValue(null);
     const ctx = makeContext('Bearer invalid.token');
@@ -73,7 +73,7 @@ describe('AuthGuard', () => {
     expect(() => guard.canActivate(ctx)).toThrow(UnauthorizedException);
   });
 
-  it("retourne true et injecte request.user si le token est valide", () => {
+  it('retourne true et injecte request.user si le token est valide', () => {
     const payload = { userId: 7, email: 'user@example.com' };
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
     jest.spyOn(authService, 'verifyToken').mockReturnValue(payload);
@@ -86,9 +86,11 @@ describe('AuthGuard', () => {
     expect(request.user).toEqual(payload);
   });
 
-  it("lit la cle IS_PUBLIC_KEY depuis le handler et la classe", () => {
+  it('lit la cle IS_PUBLIC_KEY depuis le handler et la classe', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(false);
-    jest.spyOn(authService, 'verifyToken').mockReturnValue({ userId: 1, email: 'a@b.com' });
+    jest
+      .spyOn(authService, 'verifyToken')
+      .mockReturnValue({ userId: 1, email: 'a@b.com' });
     const ctx = makeContext('Bearer t.ok');
 
     guard.canActivate(ctx);

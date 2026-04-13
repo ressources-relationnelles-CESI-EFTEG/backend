@@ -3,8 +3,17 @@ import { ConflictException } from '@nestjs/common';
 
 import { FavorisService } from './favoris.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
-import { makeRessource, makeCategorie, makeUser, resetFixtureIds } from '../test-utils/fixtures';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
+import {
+  makeRessource,
+  makeCategorie,
+  makeUser,
+  resetFixtureIds,
+} from '../test-utils/fixtures';
 
 const makeFavoriRecord = (idUtilisateur = 1, idRessource = 1) => {
   const ressource = makeRessource({ idRessource });
@@ -41,7 +50,7 @@ describe('FavorisService', () => {
   });
 
   describe('findByUtilisateur', () => {
-    it("retourne les favoris avec dateAjoutFavori et auteur", async () => {
+    it('retourne les favoris avec dateAjoutFavori et auteur', async () => {
       prisma.favori.findMany.mockResolvedValue([makeFavoriRecord(1, 1)]);
 
       const result = await service.findByUtilisateur(1);
@@ -51,7 +60,7 @@ describe('FavorisService', () => {
       expect(result[0]).toHaveProperty('categorie');
     });
 
-    it("filtre par idUtilisateur", async () => {
+    it('filtre par idUtilisateur', async () => {
       prisma.favori.findMany.mockResolvedValue([]);
 
       await service.findByUtilisateur(3);
@@ -64,7 +73,11 @@ describe('FavorisService', () => {
 
   describe('isFavori', () => {
     it("retourne favori: true si l'entree existe", async () => {
-      prisma.favori.findUnique.mockResolvedValue({ idUtilisateur: 1, idRessource: 1, dateAjout: new Date() });
+      prisma.favori.findUnique.mockResolvedValue({
+        idUtilisateur: 1,
+        idRessource: 1,
+        dateAjout: new Date(),
+      });
 
       const result = await service.isFavori(1, 1);
 
@@ -83,28 +96,44 @@ describe('FavorisService', () => {
   describe('add', () => {
     it("ajoute le favori si il n'existe pas", async () => {
       prisma.favori.findUnique.mockResolvedValue(null);
-      prisma.favori.create.mockResolvedValue({ idUtilisateur: 1, idRessource: 1, dateAjout: new Date() });
+      prisma.favori.create.mockResolvedValue({
+        idUtilisateur: 1,
+        idRessource: 1,
+        dateAjout: new Date(),
+      });
 
       await service.add(1, 1);
 
-      expect(prisma.favori.create).toHaveBeenCalledWith({ data: { idUtilisateur: 1, idRessource: 1 } });
+      expect(prisma.favori.create).toHaveBeenCalledWith({
+        data: { idUtilisateur: 1, idRessource: 1 },
+      });
     });
 
-    it("leve ConflictException si le favori existe deja", async () => {
-      prisma.favori.findUnique.mockResolvedValue({ idUtilisateur: 1, idRessource: 1, dateAjout: new Date() });
+    it('leve ConflictException si le favori existe deja', async () => {
+      prisma.favori.findUnique.mockResolvedValue({
+        idUtilisateur: 1,
+        idRessource: 1,
+        dateAjout: new Date(),
+      });
 
       await expect(service.add(1, 1)).rejects.toThrow(ConflictException);
     });
   });
 
   describe('remove', () => {
-    it("supprime le favori via la cle composite", async () => {
-      prisma.favori.delete.mockResolvedValue({ idUtilisateur: 1, idRessource: 1, dateAjout: new Date() });
+    it('supprime le favori via la cle composite', async () => {
+      prisma.favori.delete.mockResolvedValue({
+        idUtilisateur: 1,
+        idRessource: 1,
+        dateAjout: new Date(),
+      });
 
       await service.remove(1, 1);
 
       expect(prisma.favori.delete).toHaveBeenCalledWith({
-        where: { idUtilisateur_idRessource: { idUtilisateur: 1, idRessource: 1 } },
+        where: {
+          idUtilisateur_idRessource: { idUtilisateur: 1, idRessource: 1 },
+        },
       });
     });
   });

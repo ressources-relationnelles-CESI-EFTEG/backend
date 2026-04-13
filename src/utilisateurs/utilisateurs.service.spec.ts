@@ -3,7 +3,11 @@ import { NotFoundException } from '@nestjs/common';
 
 import { UtilisateursService } from './utilisateurs.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { makeUser, resetFixtureIds } from '../test-utils/fixtures';
 
 describe('UtilisateursService', () => {
@@ -27,7 +31,7 @@ describe('UtilisateursService', () => {
   // ─── findAll ─────────────────────────────────────────────────────────────────
 
   describe('findAll', () => {
-    it("retourne les utilisateurs sans motDePasse", async () => {
+    it('retourne les utilisateurs sans motDePasse', async () => {
       const user = makeUser();
       prisma.utilisateur.findMany.mockResolvedValue([user]);
 
@@ -36,7 +40,7 @@ describe('UtilisateursService', () => {
       expect(result[0]).not.toHaveProperty('motDePasse');
     });
 
-    it("filtre par search sur prenom/nom/email", async () => {
+    it('filtre par search sur prenom/nom/email', async () => {
       prisma.utilisateur.findMany.mockResolvedValue([]);
 
       await service.findAll('alice');
@@ -45,7 +49,7 @@ describe('UtilisateursService', () => {
       expect(call.where).toHaveProperty('OR');
     });
 
-    it("retourne tous les utilisateurs sans filtre", async () => {
+    it('retourne tous les utilisateurs sans filtre', async () => {
       prisma.utilisateur.findMany.mockResolvedValue([]);
 
       await service.findAll();
@@ -78,7 +82,7 @@ describe('UtilisateursService', () => {
   // ─── update ──────────────────────────────────────────────────────────────────
 
   describe('update', () => {
-    it("met a jour les champs et retourne sans motDePasse", async () => {
+    it('met a jour les champs et retourne sans motDePasse', async () => {
       const user = makeUser({ idUtilisateur: 1 });
       prisma.utilisateur.findUnique.mockResolvedValue(user);
       const updated = { ...user, prenom: 'Marie' };
@@ -93,7 +97,9 @@ describe('UtilisateursService', () => {
     it("leve NotFoundException si l'utilisateur n'existe pas", async () => {
       prisma.utilisateur.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(99, {} as any)).rejects.toThrow(NotFoundException);
+      await expect(service.update(99, {} as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -117,7 +123,9 @@ describe('UtilisateursService', () => {
     it("leve NotFoundException si l'utilisateur n'existe pas", async () => {
       prisma.utilisateur.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateStatut(99, 'INACTIF')).rejects.toThrow(NotFoundException);
+      await expect(service.updateStatut(99, 'INACTIF')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -141,7 +149,9 @@ describe('UtilisateursService', () => {
     it("leve NotFoundException si l'utilisateur n'existe pas", async () => {
       prisma.utilisateur.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateRole(99, 'MODERATEUR')).rejects.toThrow(NotFoundException);
+      await expect(service.updateRole(99, 'MODERATEUR')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -155,7 +165,9 @@ describe('UtilisateursService', () => {
 
       await service.remove(1);
 
-      expect(prisma.utilisateur.delete).toHaveBeenCalledWith({ where: { idUtilisateur: 1 } });
+      expect(prisma.utilisateur.delete).toHaveBeenCalledWith({
+        where: { idUtilisateur: 1 },
+      });
     });
 
     it("leve NotFoundException si l'utilisateur n'existe pas", async () => {

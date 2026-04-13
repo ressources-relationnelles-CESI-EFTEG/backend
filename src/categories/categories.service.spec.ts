@@ -3,7 +3,11 @@ import { NotFoundException } from '@nestjs/common';
 
 import { CategoriesService } from './categories.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { makeCategorie, resetFixtureIds } from '../test-utils/fixtures';
 
 describe('CategoriesService', () => {
@@ -25,7 +29,7 @@ describe('CategoriesService', () => {
   });
 
   describe('findAll', () => {
-    it("retourne toutes les categories avec leurs enfants", async () => {
+    it('retourne toutes les categories avec leurs enfants', async () => {
       const cats = [makeCategorie(), makeCategorie()];
       prisma.categorie.findMany.mockResolvedValue(cats);
 
@@ -39,7 +43,7 @@ describe('CategoriesService', () => {
   });
 
   describe('findById', () => {
-    it("retourne la categorie si elle existe", async () => {
+    it('retourne la categorie si elle existe', async () => {
       const cat = makeCategorie({ idCategorie: 1 });
       prisma.categorie.findUnique.mockResolvedValue(cat);
 
@@ -48,7 +52,7 @@ describe('CategoriesService', () => {
       expect(result.idCategorie).toBe(1);
     });
 
-    it("leve NotFoundException si la categorie est introuvable", async () => {
+    it('leve NotFoundException si la categorie est introuvable', async () => {
       prisma.categorie.findUnique.mockResolvedValue(null);
 
       await expect(service.findById(99)).rejects.toThrow(NotFoundException);
@@ -56,7 +60,7 @@ describe('CategoriesService', () => {
   });
 
   describe('create', () => {
-    it("cree une categorie et la retourne", async () => {
+    it('cree une categorie et la retourne', async () => {
       const cat = makeCategorie({ nom: 'Sante' });
       prisma.categorie.create.mockResolvedValue(cat);
 
@@ -67,7 +71,7 @@ describe('CategoriesService', () => {
   });
 
   describe('update', () => {
-    it("met a jour la categorie si elle existe", async () => {
+    it('met a jour la categorie si elle existe', async () => {
       const cat = makeCategorie({ idCategorie: 1 });
       prisma.categorie.findUnique.mockResolvedValue(cat);
       const updated = { ...cat, nom: 'Sport' };
@@ -81,19 +85,23 @@ describe('CategoriesService', () => {
     it("leve NotFoundException si la categorie n'existe pas", async () => {
       prisma.categorie.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(99, { nom: 'X' })).rejects.toThrow(NotFoundException);
+      await expect(service.update(99, { nom: 'X' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('remove', () => {
-    it("supprime la categorie si elle existe", async () => {
+    it('supprime la categorie si elle existe', async () => {
       const cat = makeCategorie({ idCategorie: 1 });
       prisma.categorie.findUnique.mockResolvedValue(cat);
       prisma.categorie.delete.mockResolvedValue(cat);
 
       await service.remove(1);
 
-      expect(prisma.categorie.delete).toHaveBeenCalledWith({ where: { idCategorie: 1 } });
+      expect(prisma.categorie.delete).toHaveBeenCalledWith({
+        where: { idCategorie: 1 },
+      });
     });
 
     it("leve NotFoundException si la categorie n'existe pas", async () => {

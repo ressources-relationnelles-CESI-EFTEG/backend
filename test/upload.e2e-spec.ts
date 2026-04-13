@@ -41,7 +41,10 @@ describe('Upload photo profil (e2e)', () => {
       const res = await http()
         .post(`/utilisateurs/${user.id}/photo`)
         .set('Authorization', `Bearer ${user.token}`)
-        .attach('photo', pngBuffer, { filename: 'test.png', contentType: 'image/png' });
+        .attach('photo', pngBuffer, {
+          filename: 'test.png',
+          contentType: 'image/png',
+        });
 
       expect(res.status).toBe(201);
       expect(res.body.photoProfil).toMatch(/^\/uploads\/photo-/);
@@ -54,7 +57,10 @@ describe('Upload photo profil (e2e)', () => {
       const res = await http()
         .post(`/utilisateurs/${user.id}/photo`)
         .set('Authorization', `Bearer ${user.token}`)
-        .attach('photo', txtBuffer, { filename: 'test.txt', contentType: 'text/plain' });
+        .attach('photo', txtBuffer, {
+          filename: 'test.txt',
+          contentType: 'text/plain',
+        });
 
       expect(res.status).toBe(400);
     });
@@ -65,7 +71,11 @@ describe('Upload photo profil (e2e)', () => {
       const user = await createCitoyen(prisma);
 
       // Cree un faux fichier dans uploads
-      const fakeFile = join(process.cwd(), 'uploads', `photo-fake-${Date.now()}.png`);
+      const fakeFile = join(
+        process.cwd(),
+        'uploads',
+        `photo-fake-${Date.now()}.png`,
+      );
       writeFileSync(fakeFile, 'fake image');
       await prisma.utilisateur.update({
         where: { idUtilisateur: user.id },

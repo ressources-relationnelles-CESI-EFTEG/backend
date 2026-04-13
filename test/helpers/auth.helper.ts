@@ -37,7 +37,9 @@ export async function createTestUser(
     nom?: string;
   } = {},
 ): Promise<TestUser> {
-  const email = overrides.email ?? `user-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`;
+  const email =
+    overrides.email ??
+    `user-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`;
   const salt = await genSalt(10);
   const motDePasse = await hash(DEFAULT_PASSWORD, salt);
 

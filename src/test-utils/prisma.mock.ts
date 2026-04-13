@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { PrismaService } from '../prisma/prisma.service';
 
 type ModelMethods =
@@ -58,7 +57,7 @@ export type PrismaMock = {
  */
 export function createPrismaMock(): PrismaMock {
   const mock: any = {
-    $transaction: jest.fn(async (cb: any) =>
+    $transaction: jest.fn((cb: any) =>
       typeof cb === 'function' ? cb(mock) : cb,
     ),
     $connect: jest.fn(),

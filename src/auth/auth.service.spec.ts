@@ -13,7 +13,11 @@ import {
   createPrismaMock,
   type PrismaMock,
 } from '../test-utils/prisma.mock';
-import { makeUser, resetFixtureIds, uniqueConstraintError } from '../test-utils/fixtures';
+import {
+  makeUser,
+  resetFixtureIds,
+  uniqueConstraintError,
+} from '../test-utils/fixtures';
 
 import * as bcrypt from 'bcryptjs';
 
@@ -46,12 +50,15 @@ describe('AuthService', () => {
   // ─── login ──────────────────────────────────────────────────────────────────
 
   describe('login', () => {
-    it("retourne accessToken et user pour des credentials valides", async () => {
+    it('retourne accessToken et user pour des credentials valides', async () => {
       const user = makeUser({ email: 'alice@example.com' });
       prisma.utilisateur.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.login({ email: 'alice@example.com', password: 'password123' });
+      const result = await service.login({
+        email: 'alice@example.com',
+        password: 'password123',
+      });
 
       expect(result.accessToken).toBeDefined();
       expect(result.refreshToken).toBeDefined();
@@ -79,7 +86,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it("leve UnauthorizedException si le mot de passe est incorrect", async () => {
+    it('leve UnauthorizedException si le mot de passe est incorrect', async () => {
       const user = makeUser();
       prisma.utilisateur.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
@@ -89,7 +96,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it("leve UnauthorizedException si le statut est INACTIF", async () => {
+    it('leve UnauthorizedException si le statut est INACTIF', async () => {
       const user = makeUser({ statut: StatutUtilisateur.INACTIF });
       prisma.utilisateur.findUnique.mockResolvedValue(user);
 
@@ -98,7 +105,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it("leve UnauthorizedException si le statut est SUSPENDU", async () => {
+    it('leve UnauthorizedException si le statut est SUSPENDU', async () => {
       const user = makeUser({ statut: StatutUtilisateur.SUSPENDU });
       prisma.utilisateur.findUnique.mockResolvedValue(user);
 
@@ -113,7 +120,7 @@ describe('AuthService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it("leve BadRequestException si le mot de passe est absent", async () => {
+    it('leve BadRequestException si le mot de passe est absent', async () => {
       await expect(
         service.login({ email: 'a@b.com', password: '' }),
       ).rejects.toThrow(BadRequestException);
@@ -132,7 +139,11 @@ describe('AuthService', () => {
     };
 
     it("cree l'utilisateur et retourne un message de succes", async () => {
-      const user = makeUser({ email: validInput.email, prenom: 'Jean', nom: 'Dupont' });
+      const user = makeUser({
+        email: validInput.email,
+        prenom: 'Jean',
+        nom: 'Dupont',
+      });
       prisma.utilisateur.create.mockResolvedValue(user);
 
       const result = await service.register(validInput);
@@ -142,25 +153,29 @@ describe('AuthService', () => {
       expect(prisma.utilisateur.create).toHaveBeenCalledTimes(1);
     });
 
-    it("leve BadRequestException si les mots de passe ne correspondent pas", async () => {
+    it('leve BadRequestException si les mots de passe ne correspondent pas', async () => {
       await expect(
         service.register({ ...validInput, confirmPassword: 'different' }),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it("leve BadRequestException si le mot de passe est trop court (< 8 chars)", async () => {
+    it('leve BadRequestException si le mot de passe est trop court (< 8 chars)', async () => {
       await expect(
-        service.register({ ...validInput, password: 'short', confirmPassword: 'short' }),
+        service.register({
+          ...validInput,
+          password: 'short',
+          confirmPassword: 'short',
+        }),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it("leve BadRequestException si le prenom est manquant", async () => {
+    it('leve BadRequestException si le prenom est manquant', async () => {
       await expect(
         service.register({ ...validInput, firstname: '' }),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it("leve BadRequestException si le nom est manquant", async () => {
+    it('leve BadRequestException si le nom est manquant', async () => {
       await expect(
         service.register({ ...validInput, lastname: '' }),
       ).rejects.toThrow(BadRequestException);
@@ -173,16 +188,22 @@ describe('AuthService', () => {
     });
 
     it("leve ConflictException si l'email est deja utilise (P2002)", async () => {
-      prisma.utilisateur.create.mockRejectedValue(uniqueConstraintError('email'));
+      prisma.utilisateur.create.mockRejectedValue(
+        uniqueConstraintError('email'),
+      );
 
-      await expect(service.register(validInput)).rejects.toThrow(ConflictException);
+      await expect(service.register(validInput)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
-    it("propage les erreurs inconnues de la DB telles quelles", async () => {
+    it('propage les erreurs inconnues de la DB telles quelles', async () => {
       const dbError = new Error('Unexpected DB error');
       prisma.utilisateur.create.mockRejectedValue(dbError);
 
-      await expect(service.register(validInput)).rejects.toThrow('Unexpected DB error');
+      await expect(service.register(validInput)).rejects.toThrow(
+        'Unexpected DB error',
+      );
     });
   });
 
@@ -197,8 +218,11 @@ describe('AuthService', () => {
       confirmPassword: 'adminpass',
     };
 
-    it("cree un admin et retourne un message de succes", async () => {
-      const user = makeUser({ email: validInput.email, role: 'ADMINISTRATEUR' as any });
+    it('cree un admin et retourne un message de succes', async () => {
+      const user = makeUser({
+        email: validInput.email,
+        role: 'ADMINISTRATEUR' as any,
+      });
       prisma.utilisateur.create.mockResolvedValue(user);
 
       const result = await service.createAdmin(validInput);
@@ -211,48 +235,55 @@ describe('AuthService', () => {
       );
     });
 
-    it("leve BadRequestException si un champ est manquant", async () => {
+    it('leve BadRequestException si un champ est manquant', async () => {
       await expect(
         service.createAdmin({ ...validInput, firstname: '' }),
       ).rejects.toThrow(BadRequestException);
     });
 
-    it("leve BadRequestException si le mot de passe est trop court", async () => {
+    it('leve BadRequestException si le mot de passe est trop court', async () => {
       await expect(
         service.createAdmin({ ...validInput, password: '1234567' }),
       ).rejects.toThrow(BadRequestException);
     });
 
     it("leve ConflictException si l'email est deja utilise", async () => {
-      prisma.utilisateur.create.mockRejectedValue(uniqueConstraintError('email'));
+      prisma.utilisateur.create.mockRejectedValue(
+        uniqueConstraintError('email'),
+      );
 
-      await expect(service.createAdmin(validInput)).rejects.toThrow(ConflictException);
+      await expect(service.createAdmin(validInput)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
   // ─── verifyToken ─────────────────────────────────────────────────────────────
 
   describe('verifyToken', () => {
-    it("retourne userId et email pour un token valide", async () => {
+    it('retourne userId et email pour un token valide', async () => {
       const user = makeUser({ idUtilisateur: 42, email: 'test@example.com' });
       prisma.utilisateur.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const { accessToken } = await service.login({ email: user.email, password: 'pw' });
+      const { accessToken } = await service.login({
+        email: user.email,
+        password: 'pw',
+      });
       const payload = service.verifyToken(accessToken);
 
       expect(payload).toEqual({ userId: 42, email: 'test@example.com' });
     });
 
-    it("retourne null pour un token avec signature invalide", () => {
+    it('retourne null pour un token avec signature invalide', () => {
       expect(service.verifyToken('abc.invalidsignature')).toBeNull();
     });
 
-    it("retourne null si le token ne contient pas de point", () => {
+    it('retourne null si le token ne contient pas de point', () => {
       expect(service.verifyToken('tokenSansPoint')).toBeNull();
     });
 
-    it("retourne null pour un token expire (> 24h)", () => {
+    it('retourne null pour un token expire (> 24h)', () => {
       const user = makeUser({ idUtilisateur: 1, email: 'old@example.com' });
       const { createHmac } = require('crypto');
       const secret = process.env.AUTH_TOKEN_SECRET ?? 'dev-sign-in-secret';
@@ -264,7 +295,7 @@ describe('AuthService', () => {
       expect(service.verifyToken(`${payloadB64}.${sig}`)).toBeNull();
     });
 
-    it("retourne null pour une chaine vide", () => {
+    it('retourne null pour une chaine vide', () => {
       expect(service.verifyToken('')).toBeNull();
     });
   });

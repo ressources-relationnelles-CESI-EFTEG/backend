@@ -11,7 +11,9 @@ export class CommentairesService {
     utilisateur: { select: { idUtilisateur: true, prenom: true, nom: true } },
     reponses: {
       include: {
-        utilisateur: { select: { idUtilisateur: true, prenom: true, nom: true } },
+        utilisateur: {
+          select: { idUtilisateur: true, prenom: true, nom: true },
+        },
       },
       orderBy: { dateCreation: 'asc' as const },
     },
@@ -44,6 +46,7 @@ export class CommentairesService {
 
   async create(dto: CreateCommentaireDto) {
     return this.prisma.commentaire.create({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: dto as any,
       include: this.defaultInclude,
     });
@@ -54,8 +57,9 @@ export class CommentairesService {
 
     return this.prisma.commentaire.update({
       where: { idCommentaire: id },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: {
-        ...dto as any,
+        ...(dto as any),
         dateModification: new Date(),
       },
       include: this.defaultInclude,

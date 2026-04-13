@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { TypeProgression } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateProgressionDto } from './dto/create-progression.dto';
 import type { UpdateProgressionDto } from './dto/update-progression.dto';
@@ -17,7 +18,7 @@ export class ProgressionsService {
     return this.prisma.progression.findMany({
       where: {
         idUtilisateur,
-        ...(type ? { typeProgression: type as any } : {}),
+        ...(type ? { typeProgression: type as TypeProgression } : {}),
       },
       include: this.defaultInclude,
       orderBy: { dateAjout: 'desc' },
@@ -39,6 +40,7 @@ export class ProgressionsService {
 
   async create(dto: CreateProgressionDto) {
     return this.prisma.progression.create({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: dto as any,
       include: this.defaultInclude,
     });
@@ -49,6 +51,7 @@ export class ProgressionsService {
 
     return this.prisma.progression.update({
       where: { idProgression: id },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: dto as any,
       include: this.defaultInclude,
     });

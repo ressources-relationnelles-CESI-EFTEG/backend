@@ -106,6 +106,7 @@ export class UtilisateursController {
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     return this.utilisateursService.update(id, { photoProfil: null as any });
   }
 

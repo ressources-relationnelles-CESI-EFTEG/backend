@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { StatutSignalement } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateSignalementDto } from './dto/create-signalement.dto';
 import type { UpdateSignalementDto } from './dto/update-signalement.dto';
@@ -16,7 +17,7 @@ export class SignalementsService {
 
   async findAll(statut?: string) {
     return this.prisma.signalement.findMany({
-      where: statut ? { statut: statut as any } : {},
+      where: statut ? { statut: statut as StatutSignalement } : {},
       include: this.defaultInclude,
       orderBy: { dateCreation: 'desc' },
     });
@@ -37,6 +38,7 @@ export class SignalementsService {
 
   async create(dto: CreateSignalementDto) {
     return this.prisma.signalement.create({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: dto as any,
       include: this.defaultInclude,
     });
@@ -47,9 +49,12 @@ export class SignalementsService {
 
     return this.prisma.signalement.update({
       where: { idSignalement: id },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: {
-        ...dto as any,
-        ...(dto.statut && dto.statut !== 'EN_ATTENTE' ? { dateTraitement: new Date() } : {}),
+        ...(dto as any),
+        ...(dto.statut && dto.statut !== 'EN_ATTENTE'
+          ? { dateTraitement: new Date() }
+          : {}),
       },
       include: this.defaultInclude,
     });

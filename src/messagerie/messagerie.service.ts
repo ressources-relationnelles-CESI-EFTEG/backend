@@ -22,7 +22,9 @@ export class MessagerieService {
           orderBy: { dateEnvoi: 'desc' },
           take: 1,
           include: {
-            utilisateur: { select: { idUtilisateur: true, prenom: true, nom: true } },
+            utilisateur: {
+              select: { idUtilisateur: true, prenom: true, nom: true },
+            },
           },
         },
       },
@@ -57,7 +59,9 @@ export class MessagerieService {
     return this.prisma.message.findMany({
       where: { idConversation },
       include: {
-        utilisateur: { select: { idUtilisateur: true, prenom: true, nom: true } },
+        utilisateur: {
+          select: { idUtilisateur: true, prenom: true, nom: true },
+        },
       },
       orderBy: { dateEnvoi: 'asc' },
     });
@@ -86,7 +90,9 @@ export class MessagerieService {
         contenu: dto.contenu,
       },
       include: {
-        utilisateur: { select: { idUtilisateur: true, prenom: true, nom: true } },
+        utilisateur: {
+          select: { idUtilisateur: true, prenom: true, nom: true },
+        },
       },
     });
   }

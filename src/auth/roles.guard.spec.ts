@@ -6,9 +6,16 @@ import { RoleUtilisateur } from '@prisma/client';
 import { RolesGuard } from './roles.guard';
 import { ROLES_KEY } from './roles.decorator';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 
-function makeContext(user?: { userId: number; email: string }): ExecutionContext {
+function makeContext(user?: {
+  userId: number;
+  email: string;
+}): ExecutionContext {
   const request: Record<string, unknown> = user ? { user } : {};
 
   return {
@@ -47,22 +54,26 @@ describe('RolesGuard', () => {
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
   });
 
-  it("retourne true si le tableau de roles requis est vide", async () => {
+  it('retourne true si le tableau de roles requis est vide', async () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([]);
     const ctx = makeContext({ userId: 1, email: 'a@b.com' });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
   });
 
-  it("leve ForbiddenException si request.user est absent", async () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMINISTRATEUR']);
+  it('leve ForbiddenException si request.user est absent', async () => {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['ADMINISTRATEUR']);
     const ctx = makeContext();
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
   });
 
   it("leve ForbiddenException si l'utilisateur est introuvable en DB", async () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMINISTRATEUR']);
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['ADMINISTRATEUR']);
     prisma.utilisateur.findUnique.mockResolvedValue(null);
     const ctx = makeContext({ userId: 99, email: 'ghost@example.com' });
 
@@ -70,30 +81,40 @@ describe('RolesGuard', () => {
   });
 
   it("leve ForbiddenException si le role de l'utilisateur n'est pas dans la liste", async () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMINISTRATEUR']);
-    prisma.utilisateur.findUnique.mockResolvedValue({ role: RoleUtilisateur.CITOYEN });
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['ADMINISTRATEUR']);
+    prisma.utilisateur.findUnique.mockResolvedValue({
+      role: RoleUtilisateur.CITOYEN,
+    });
     const ctx = makeContext({ userId: 1, email: 'user@example.com' });
 
     await expect(guard.canActivate(ctx)).rejects.toThrow(ForbiddenException);
   });
 
   it("retourne true si le role de l'utilisateur est dans la liste autorisee", async () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['ADMINISTRATEUR']);
-    prisma.utilisateur.findUnique.mockResolvedValue({ role: RoleUtilisateur.ADMINISTRATEUR });
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(['ADMINISTRATEUR']);
+    prisma.utilisateur.findUnique.mockResolvedValue({
+      role: RoleUtilisateur.ADMINISTRATEUR,
+    });
     const ctx = makeContext({ userId: 2, email: 'admin@example.com' });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
   });
 
-  it("autorise SUPER_ADMIN quand le role requis est SUPER_ADMIN", async () => {
+  it('autorise SUPER_ADMIN quand le role requis est SUPER_ADMIN', async () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['SUPER_ADMIN']);
-    prisma.utilisateur.findUnique.mockResolvedValue({ role: RoleUtilisateur.SUPER_ADMIN });
+    prisma.utilisateur.findUnique.mockResolvedValue({
+      role: RoleUtilisateur.SUPER_ADMIN,
+    });
     const ctx = makeContext({ userId: 3, email: 'superadmin@example.com' });
 
     await expect(guard.canActivate(ctx)).resolves.toBe(true);
   });
 
-  it("verifie la cle ROLES_KEY sur handler et classe", async () => {
+  it('verifie la cle ROLES_KEY sur handler et classe', async () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([]);
     const ctx = makeContext({ userId: 1, email: 'a@b.com' });
 
@@ -105,9 +126,11 @@ describe('RolesGuard', () => {
     ]);
   });
 
-  it("interroge prisma avec idUtilisateur et select role seulement", async () => {
+  it('interroge prisma avec idUtilisateur et select role seulement', async () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['MODERATEUR']);
-    prisma.utilisateur.findUnique.mockResolvedValue({ role: RoleUtilisateur.MODERATEUR });
+    prisma.utilisateur.findUnique.mockResolvedValue({
+      role: RoleUtilisateur.MODERATEUR,
+    });
     const ctx = makeContext({ userId: 5, email: 'm@example.com' });
 
     await guard.canActivate(ctx);

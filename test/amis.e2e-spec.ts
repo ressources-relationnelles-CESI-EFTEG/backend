@@ -23,7 +23,7 @@ describe('Amis (e2e)', () => {
 
   const http = () => request(app.getHttpServer());
 
-  describe('Parcours complet demande d\'amitie', () => {
+  describe("Parcours complet demande d'amitie", () => {
     it('envoie, accepte, liste, supprime', async () => {
       const alice = await createCitoyen(prisma);
       const bob = await createCitoyen(prisma);

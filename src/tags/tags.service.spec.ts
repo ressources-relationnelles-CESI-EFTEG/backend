@@ -3,7 +3,11 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 
 import { TagsService } from './tags.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { asPrismaService, createPrismaMock, type PrismaMock } from '../test-utils/prisma.mock';
+import {
+  asPrismaService,
+  createPrismaMock,
+  type PrismaMock,
+} from '../test-utils/prisma.mock';
 import { resetFixtureIds } from '../test-utils/fixtures';
 
 const makeTag = (overrides: any = {}) => ({
@@ -31,19 +35,21 @@ describe('TagsService', () => {
   });
 
   describe('findAll', () => {
-    it("retourne tous les tags tries par nom", async () => {
+    it('retourne tous les tags tries par nom', async () => {
       const tags = [makeTag({ nom: 'aide' }), makeTag({ nom: 'sante' })];
       prisma.tag.findMany.mockResolvedValue(tags);
 
       const result = await service.findAll();
 
       expect(result).toHaveLength(2);
-      expect(prisma.tag.findMany).toHaveBeenCalledWith({ orderBy: { nom: 'asc' } });
+      expect(prisma.tag.findMany).toHaveBeenCalledWith({
+        orderBy: { nom: 'asc' },
+      });
     });
   });
 
   describe('findById', () => {
-    it("retourne le tag si il existe", async () => {
+    it('retourne le tag si il existe', async () => {
       const tag = makeTag({ idTag: 5 });
       prisma.tag.findUnique.mockResolvedValue(tag);
 
@@ -52,7 +58,7 @@ describe('TagsService', () => {
       expect(result.idTag).toBe(5);
     });
 
-    it("leve NotFoundException si le tag est introuvable", async () => {
+    it('leve NotFoundException si le tag est introuvable', async () => {
       prisma.tag.findUnique.mockResolvedValue(null);
 
       await expect(service.findById(99)).rejects.toThrow(NotFoundException);
@@ -70,15 +76,17 @@ describe('TagsService', () => {
       expect(result.nom).toBe('nouveau');
     });
 
-    it("leve ConflictException si le nom existe deja", async () => {
+    it('leve ConflictException si le nom existe deja', async () => {
       prisma.tag.findUnique.mockResolvedValue(makeTag({ nom: 'sante' }));
 
-      await expect(service.create({ nom: 'sante' })).rejects.toThrow(ConflictException);
+      await expect(service.create({ nom: 'sante' })).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
   describe('remove', () => {
-    it("supprime le tag si il existe", async () => {
+    it('supprime le tag si il existe', async () => {
       const tag = makeTag({ idTag: 1 });
       prisma.tag.findUnique.mockResolvedValue(tag);
       prisma.tag.delete.mockResolvedValue(tag);
@@ -96,20 +104,25 @@ describe('TagsService', () => {
   });
 
   describe('addToRessource', () => {
-    it("cree une association ressource-tag", async () => {
+    it('cree une association ressource-tag', async () => {
       const link = { idRessource: 1, idTag: 2 };
       prisma.ressourceTag.create.mockResolvedValue(link);
 
       const result = await service.addToRessource(1, 2);
 
-      expect(prisma.ressourceTag.create).toHaveBeenCalledWith({ data: { idRessource: 1, idTag: 2 } });
+      expect(prisma.ressourceTag.create).toHaveBeenCalledWith({
+        data: { idRessource: 1, idTag: 2 },
+      });
       expect(result).toEqual(link);
     });
   });
 
   describe('removeFromRessource', () => {
     it("supprime l'association ressource-tag via la cle composite", async () => {
-      prisma.ressourceTag.delete.mockResolvedValue({ idRessource: 1, idTag: 2 });
+      prisma.ressourceTag.delete.mockResolvedValue({
+        idRessource: 1,
+        idTag: 2,
+      });
 
       await service.removeFromRessource(1, 2);
 
