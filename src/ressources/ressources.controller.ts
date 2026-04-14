@@ -18,6 +18,12 @@ import { Roles } from '../auth/roles.decorator';
 export class RessourcesController {
   constructor(private readonly ressourcesService: RessourcesService) {}
 
+  @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
+  @Get('moderation')
+  findForModeration() {
+    return this.ressourcesService.findForModeration();
+  }
+
   @Get()
   findAll(@Query('categorie') categorie?: string) {
     const categorieId = categorie ? parseInt(categorie, 10) : undefined;

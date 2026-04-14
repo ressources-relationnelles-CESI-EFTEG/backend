@@ -13,6 +13,16 @@ export class RessourcesService {
     tags: { include: { tag: true } },
   };
 
+  async findForModeration() {
+    return this.prisma.ressource.findMany({
+      where: {
+        statut: { in: ['EN_ATTENTE', 'REJETEE'] },
+      },
+      include: this.defaultInclude,
+      orderBy: { dateCreation: 'desc' },
+    });
+  }
+
   async findAll(categorieId?: number) {
     return this.prisma.ressource.findMany({
       where: {
