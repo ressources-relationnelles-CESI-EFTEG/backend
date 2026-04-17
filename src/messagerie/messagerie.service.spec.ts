@@ -156,10 +156,7 @@ describe('MessagerieService', () => {
       const msg = makeMessage({ contenu: 'Bonjour' });
       prisma.message.create.mockResolvedValue(msg);
 
-      const result = await service.sendMessage(1, {
-        idUtilisateur: 2,
-        contenu: 'Bonjour',
-      });
+      const result = await service.sendMessage(1, { contenu: 'Bonjour' }, 2);
 
       expect(prisma.message.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -173,7 +170,7 @@ describe('MessagerieService', () => {
       prisma.conversation.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.sendMessage(99, { idUtilisateur: 1, contenu: 'test' }),
+        service.sendMessage(99, { contenu: 'test' }, 1),
       ).rejects.toThrow(NotFoundException);
     });
   });
