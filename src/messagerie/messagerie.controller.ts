@@ -1,15 +1,19 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { MessagerieService } from './messagerie.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { SendMessageDto } from './dto/send-message.dto';
+
+type AuthRequest = { user: { userId: number; email: string } };
 
 @Controller('messagerie')
 export class MessagerieController {
@@ -44,8 +48,9 @@ export class MessagerieController {
   sendMessage(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: SendMessageDto,
+    @Req() req: AuthRequest,
   ) {
-    return this.messagerieService.sendMessage(id, dto);
+    return this.messagerieService.sendMessage(id, dto, req.user.userId);
   }
 
   @Patch('conversations/:id/lu/:userId')
@@ -54,5 +59,29 @@ export class MessagerieController {
     @Param('userId', ParseIntPipe) userId: number,
   ) {
     return this.messagerieService.markAsRead(id, userId);
+  }
+
+  @Delete('conversations/:id')
+  leaveConversation(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthRequest,
+  ) {
+    return this.messagerieService.leaveConversation(id, req.user.userId);
+  }
+
+  @Delete('conversations/:id/participants/me')
+  leaveConversationAlias(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthRequest,
+  ) {
+    return this.messagerieService.leaveConversation(id, req.user.userId);
+  }
+
+  @Delete('messages/:idMessage')
+  deleteMessage(
+    @Param('idMessage', ParseIntPipe) idMessage: number,
+    @Req() req: AuthRequest,
+  ) {
+    return this.messagerieService.deleteMessage(idMessage, req.user.userId);
   }
 }

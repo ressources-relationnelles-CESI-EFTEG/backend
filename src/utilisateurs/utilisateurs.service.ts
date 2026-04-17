@@ -24,6 +24,25 @@ export class UtilisateursService {
     return utilisateurs.map(({ motDePasse: _motDePasse, ...u }) => u);
   }
 
+  async searchForMessaging(search: string) {
+    const utilisateurs = await this.prisma.utilisateur.findMany({
+      where: {
+        OR: [
+          { prenom: { contains: search, mode: 'insensitive' } },
+          { nom: { contains: search, mode: 'insensitive' } },
+        ],
+      },
+      select: {
+        idUtilisateur: true,
+        prenom: true,
+        nom: true,
+        photoProfil: true,
+      },
+      take: 20,
+    });
+    return utilisateurs;
+  }
+
   async findById(id: number) {
     const utilisateur = await this.prisma.utilisateur.findUnique({
       where: { idUtilisateur: id },

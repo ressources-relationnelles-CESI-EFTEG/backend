@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateConversationDto } from './dto/create-conversation.dto';
 import type { SendMessageDto } from './dto/send-message.dto';
@@ -80,13 +84,17 @@ export class MessagerieService {
     });
   }
 
-  async sendMessage(idConversation: number, dto: SendMessageDto) {
+  async sendMessage(
+    idConversation: number,
+    dto: SendMessageDto,
+    idUtilisateur: number,
+  ) {
     await this.findConversationById(idConversation);
 
     return this.prisma.message.create({
       data: {
         idConversation,
-        idUtilisateur: dto.idUtilisateur,
+        idUtilisateur,
         contenu: dto.contenu,
       },
       include: {
@@ -122,5 +130,54 @@ export class MessagerieService {
     });
 
     return { nonLus: count };
+  }
+
+  async leaveConversation(idConversation: number, idUtilisateur: number) {
+    const conversation = await this.findConversationById(idConversation);
+
+    const isParticipant = conversation.participants.some(
+      (p) => p.utilisateur.idUtilisateur === idUtilisateur,
+    );
+    if (!isParticipant) {
+      throw new ForbiddenException(
+        "Vous n'êtes pas participant de cette conversation.",
+      );
+    }
+
+    await this.prisma.participantConversation.delete({
+      where: {
+        idConversation_idUtilisateur: { idConversation, idUtilisateur },
+      },
+    });
+
+    const remaining = await this.prisma.participantConversation.count({
+      where: { idConversation },
+    });
+
+    if (remaining === 0) {
+      await this.prisma.conversation.delete({ where: { idConversation } });
+      return { success: true, conversationDeleted: true };
+    }
+
+    return { success: true, conversationDeleted: false };
+  }
+
+  async deleteMessage(idMessage: number, idUtilisateur: number) {
+    const message = await this.prisma.message.findUnique({
+      where: { idMessage },
+    });
+
+    if (!message) {
+      throw new NotFoundException(`Message #${idMessage} introuvable.`);
+    }
+
+    if (message.idUtilisateur !== idUtilisateur) {
+      throw new ForbiddenException(
+        "Vous ne pouvez pas supprimer le message d'un autre utilisateur.",
+      );
+    }
+
+    await this.prisma.message.delete({ where: { idMessage } });
+    return { success: true };
   }
 }
