@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
 } from '@nestjs/common';
 import { RessourcesService } from './ressources.service';
 import { CreateRessourceDto } from './dto/create-ressource.dto';
@@ -50,10 +51,11 @@ export class RessourcesController {
   @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
   @Patch(':id')
   update(
+    @Req() req: { user: { userId: number; email: string } },
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRessourceDto,
   ) {
-    return this.ressourcesService.update(id, dto);
+    return this.ressourcesService.update(id, dto, req.user.userId);
   }
 
   @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')

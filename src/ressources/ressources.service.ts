@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateRessourceDto } from './dto/create-ressource.dto';
 import type { UpdateRessourceDto } from './dto/update-ressource.dto';
@@ -58,22 +58,42 @@ export class RessourcesService {
 
   async create(dto: CreateRessourceDto) {
     return this.prisma.ressource.create({
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      data: dto as any,
+      data: {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        ...(dto as any),
+        statut: 'EN_ATTENTE',
+      },
       include: this.defaultInclude,
     });
   }
 
-  async update(id: number, dto: UpdateRessourceDto) {
-    await this.findById(id);
+  async update(id: number, dto: UpdateRessourceDto, requestingUserId: number) {
+    const ressource = await this.findById(id);
+
+    const utilisateur = await this.prisma.utilisateur.findUnique({
+      where: { idUtilisateur: requestingUserId },
+      select: { role: true },
+    });
+
+    const isModo = ['MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN'].includes(
+      utilisateur?.role ?? '',
+    );
+    const isOwner = ressource.idUtilisateur === requestingUserId;
+
+    if (!isModo && !isOwner) {
+      throw new ForbiddenException("Vous n'avez pas les droits nécessaires.");
+    }
+
+    // Le propriétaire ne peut pas choisir le statut : il repasse en EN_ATTENTE
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data: any = isModo
+      ? { ...(dto as any), dateModification: new Date() }
+      : { ...(dto as any), statut: 'EN_ATTENTE', motifRejet: null, dateModification: new Date() };
 
     return this.prisma.ressource.update({
       where: { idRessource: id },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      data: {
-        ...(dto as any),
-        dateModification: new Date(),
-      },
+      data,
       include: this.defaultInclude,
     });
   }
