@@ -101,8 +101,9 @@ export class RessourcesService {
   async remove(id: number) {
     await this.findById(id);
 
-    return this.prisma.ressource.delete({
-      where: { idRessource: id },
-    });
+    return this.prisma.$transaction([
+      this.prisma.signalement.deleteMany({ where: { idRessource: id } }),
+      this.prisma.ressource.delete({ where: { idRessource: id } }),
+    ]);
   }
 }
