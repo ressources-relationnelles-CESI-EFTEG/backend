@@ -40,7 +40,7 @@ describe('Messagerie (e2e)', () => {
       const msgRes = await http()
         .post(`/messagerie/conversations/${convId}/messages`)
         .set('Authorization', `Bearer ${alice.token}`)
-        .send({ idUtilisateur: alice.id, contenu: 'Bonjour Bob !' });
+        .send({ contenu: 'Bonjour Bob !' });
       expect(msgRes.status).toBe(201);
       expect(msgRes.body.contenu).toBe('Bonjour Bob !');
 
