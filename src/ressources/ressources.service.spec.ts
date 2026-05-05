@@ -169,7 +169,7 @@ describe('RessourcesService', () => {
       prisma.ressource.delete.mockResolvedValue(r);
       prisma.signalement.deleteMany.mockResolvedValue({ count: 0 });
 
-      await service.remove(1);
+      await service.remove(1, 1);
 
       expect(prisma.ressource.delete).toHaveBeenCalledWith({
         where: { idRessource: 1 },
@@ -179,7 +179,7 @@ describe('RessourcesService', () => {
     it("leve NotFoundException si la ressource n'existe pas", async () => {
       prisma.ressource.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove(99)).rejects.toThrow(NotFoundException);
+      await expect(service.remove(99, 1)).rejects.toThrow(NotFoundException);
     });
   });
 });

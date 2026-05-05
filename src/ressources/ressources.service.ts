@@ -98,8 +98,22 @@ export class RessourcesService {
     });
   }
 
-  async remove(id: number) {
-    await this.findById(id);
+  async remove(id: number, requestingUserId: number) {
+    const ressource = await this.findById(id);
+
+    const utilisateur = await this.prisma.utilisateur.findUnique({
+      where: { idUtilisateur: requestingUserId },
+      select: { role: true },
+    });
+
+    const isModo = ['MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN'].includes(
+      utilisateur?.role ?? '',
+    );
+    const isOwner = ressource.idUtilisateur === requestingUserId;
+
+    if (!isModo && !isOwner) {
+      throw new ForbiddenException("Vous n'avez pas les droits nécessaires.");
+    }
 
     return this.prisma.$transaction([
       this.prisma.signalement.deleteMany({ where: { idRessource: id } }),
