@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:16-alpine
     container_name: rr-cesi-db
-    restart: unless-stopped
+    restart: always
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
       POSTGRES_DB: rr_cesi
     ports:
-      - '5433:5432'
+      - '127.0.0.1:5433:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

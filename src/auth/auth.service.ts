@@ -1,21 +1,26 @@
+import { compare, genSalt, hash } from 'bcryptjs';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from 'crypto';
+import { createHmac } from 'crypto';
 import { StatutUtilisateur, type Utilisateur } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import type { SignInDto } from './dto/sign-in.dto';
-import type { SignUpDto } from './dto/sign-up.dto';
-import type { SignInResponse, SignedInUser } from './auth.types';
+import type { LoginDto } from './dto/login.dto';
+import type { RegisterDto } from './dto/register.dto';
+import type {
+  LoginResponse,
+  LoginResponseUser,
+  RegisterResponse,
+} from './auth.types';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async signIn(input: SignInDto): Promise<SignInResponse> {
+  async login(input: LoginDto): Promise<LoginResponse> {
     const email = input?.email?.trim().toLowerCase();
     const password = input?.password;
 
@@ -28,44 +33,43 @@ export class AuthService {
     });
 
     if (!utilisateur || utilisateur.statut !== StatutUtilisateur.ACTIF) {
-      throw new UnauthorizedException('Invalid credentials.');
+      throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
-    const validPassword = this.isPasswordValid(
+    const validPassword = await this.isPasswordValid(
       password,
       utilisateur.motDePasse,
     );
     if (!validPassword) {
-      throw new UnauthorizedException('Invalid credentials.');
+      throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
 
     return {
-      data: {
-        accessToken: this.buildAccessToken(utilisateur),
-        user: this.sanitizeUser(utilisateur),
-      },
+      accessToken: this.buildAccessToken(utilisateur),
+      refreshToken: this.buildAccessToken(utilisateur),
+      user: this.toLoginUser(utilisateur),
     };
   }
 
-  async signUp(input: SignUpDto): Promise<SignInResponse> {
-    const prenom = input?.prenom?.trim();
-    const nom = input?.nom?.trim();
+  async register(input: RegisterDto): Promise<RegisterResponse> {
+    const firstname = input?.firstname?.trim();
+    const lastname = input?.lastname?.trim();
     const email = input?.email?.trim().toLowerCase();
     const password = input?.password;
-    const repeatPassword = input?.repeatPassword;
+    const confirmPassword = input?.confirmPassword;
 
-    if (!email || !password || !repeatPassword) {
+    if (!email || !password || !confirmPassword) {
       throw new BadRequestException(
-        'Email, password and repeatPassword are required.',
+        'Email, password and confirmPassword are required.',
       );
     }
 
-    if (password !== repeatPassword) {
+    if (password !== confirmPassword) {
       throw new BadRequestException('Passwords do not match.');
     }
 
-    if (!prenom || !nom) {
-      throw new BadRequestException('Prenom and nom are required.');
+    if (!firstname || !lastname) {
+      throw new BadRequestException('Firstname and lastname are required.');
     }
 
     if (password.length < 8) {
@@ -74,77 +78,130 @@ export class AuthService {
       );
     }
 
-    let utilisateur: Utilisateur;
     try {
-      utilisateur = await this.prisma.utilisateur.create({
+      const utilisateur = await this.prisma.utilisateur.create({
         data: {
           email,
-          motDePasse: this.hashPassword(password),
-          prenom,
-          nom,
+          motDePasse: await this.hashPassword(password),
+          prenom: firstname,
+          nom: lastname,
         },
       });
+
+      return {
+        message: 'Compte créé avec succès',
+        user: this.toLoginUser(utilisateur),
+      };
     } catch (error: unknown) {
       if (this.isUniqueConstraintError(error)) {
-        throw new ConflictException(
-          'An account with this email already exists.',
-        );
+        throw new ConflictException("L'email est déjà utilisé");
       }
-
       throw error;
     }
+  }
 
+  verifyToken(token: string): { userId: number; email: string } | null {
+    const secret = process.env.AUTH_TOKEN_SECRET ?? 'dev-sign-in-secret';
+    const dotIndex = token.lastIndexOf('.');
+    if (dotIndex === -1) return null;
+
+    const payloadB64 = token.substring(0, dotIndex);
+    const signature = token.substring(dotIndex + 1);
+
+    const expectedSig = createHmac('sha256', secret)
+      .update(payloadB64)
+      .digest('hex');
+    if (signature !== expectedSig) return null;
+
+    try {
+      const payload = Buffer.from(payloadB64, 'base64url').toString();
+      const parts = payload.split(':');
+      const userIdStr = parts[0];
+      const email = parts[1];
+      const issuedAt = Number(parts[2]);
+      const userId = Number(userIdStr);
+      if (!Number.isInteger(userId) || !email || !issuedAt) return null;
+
+      const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+      if (Date.now() - issuedAt > TOKEN_TTL_MS) return null;
+
+      return { userId, email };
+    } catch {
+      return null;
+    }
+  }
+
+  private toLoginUser(utilisateur: Utilisateur): LoginResponseUser {
     return {
-      data: {
-        accessToken: this.buildAccessToken(utilisateur),
-        user: this.sanitizeUser(utilisateur),
-      },
+      id: utilisateur.idUtilisateur,
+      firstname: utilisateur.prenom,
+      lastname: utilisateur.nom,
+      email: utilisateur.email,
+      role: utilisateur.role.toLowerCase(),
     };
   }
 
-  private hashPassword(password: string): string {
-    const salt = randomBytes(16).toString('hex');
-    const derivedKey = scryptSync(password, salt, 64).toString('hex');
-    return `scrypt:${salt}:${derivedKey}`;
+  private async hashPassword(password: string): Promise<string> {
+    const salt = await genSalt(10);
+    return hash(password, salt);
   }
 
-  private isPasswordValid(
+  private async isPasswordValid(
     plainPassword: string,
     storedPassword: string | null,
-  ): boolean {
-    if (!storedPassword) {
-      return false;
-    }
-
-    if (storedPassword.startsWith('scrypt:')) {
-      const [, salt, storedDigest] = storedPassword.split(':');
-      if (!salt || !storedDigest) {
-        return false;
-      }
-
-      const computedDigest = scryptSync(plainPassword, salt, 64).toString(
-        'hex',
-      );
-      return timingSafeEqual(
-        Buffer.from(computedDigest, 'hex'),
-        Buffer.from(storedDigest, 'hex'),
-      );
-    }
-
-    return plainPassword === storedPassword;
+  ): Promise<boolean> {
+    if (!storedPassword) return false;
+    return compare(plainPassword, storedPassword);
   }
 
   private buildAccessToken(utilisateur: Utilisateur): string {
     const secret = process.env.AUTH_TOKEN_SECRET ?? 'dev-sign-in-secret';
     const payload = `${utilisateur.idUtilisateur}:${utilisateur.email}:${Date.now()}`;
+    const payloadB64 = Buffer.from(payload).toString('base64url');
+    const signature = createHmac('sha256', secret)
+      .update(payloadB64)
+      .digest('hex');
 
-    return createHmac('sha256', secret).update(payload).digest('hex');
+    return `${payloadB64}.${signature}`;
   }
 
-  private sanitizeUser(utilisateur: Utilisateur): SignedInUser {
-    const { motDePasse, ...safeUser } = utilisateur;
-    void motDePasse;
-    return safeUser;
+  async createAdmin(input: RegisterDto): Promise<RegisterResponse> {
+    const firstname = input?.firstname?.trim();
+    const lastname = input?.lastname?.trim();
+    const email = input?.email?.trim().toLowerCase();
+    const password = input?.password;
+
+    if (!email || !password || !firstname || !lastname) {
+      throw new BadRequestException('Tous les champs sont requis.');
+    }
+
+    if (password.length < 8) {
+      throw new BadRequestException(
+        'Le mot de passe doit contenir au moins 8 caractères.',
+      );
+    }
+
+    try {
+      const utilisateur = await this.prisma.utilisateur.create({
+        data: {
+          email,
+          motDePasse: await this.hashPassword(password),
+          prenom: firstname,
+          nom: lastname,
+          role: 'ADMINISTRATEUR',
+        },
+      });
+
+      return {
+        message: 'Compte administrateur créé avec succès',
+        user: this.toLoginUser(utilisateur),
+      };
+    } catch (error: unknown) {
+      if (this.isUniqueConstraintError(error)) {
+        throw new ConflictException("L'email est déjà utilisé");
+      }
+      throw error;
+    }
   }
 
   private isUniqueConstraintError(error: unknown): boolean {

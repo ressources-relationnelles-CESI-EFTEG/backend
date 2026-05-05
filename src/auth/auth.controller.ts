@@ -1,20 +1,32 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, SetMetadata } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
-import { SignInDto } from './dto/sign-in.dto';
-import type { SignInResponse } from './auth.types';
-import { SignUpDto } from './dto/sign-up.dto';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import type { LoginResponse, RegisterResponse } from './auth.types';
+import { IS_PUBLIC_KEY } from './auth.guard';
+import { Roles } from './roles.decorator';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('sign-in')
-  signIn(@Body() body: SignInDto): Promise<SignInResponse> {
-    return this.authService.signIn(body);
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @SetMetadata(IS_PUBLIC_KEY, true)
+  @Post('login')
+  login(@Body() body: LoginDto): Promise<LoginResponse> {
+    return this.authService.login(body);
   }
 
-  @Post('sign-up')
-  signUp(@Body() body: SignUpDto): Promise<SignInResponse> {
-    return this.authService.signUp(body);
+  @SetMetadata(IS_PUBLIC_KEY, true)
+  @Post('register')
+  register(@Body() body: RegisterDto): Promise<RegisterResponse> {
+    return this.authService.register(body);
+  }
+
+  @Roles('SUPER_ADMIN')
+  @Post('create-admin')
+  createAdmin(@Body() body: RegisterDto): Promise<RegisterResponse> {
+    return this.authService.createAdmin(body);
   }
 }
