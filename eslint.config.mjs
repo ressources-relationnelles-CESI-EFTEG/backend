@@ -38,7 +38,11 @@ export default tseslint.config(
   },
   // Relaxed rules for test files and test utilities
   {
-    files: ['src/**/*.spec.ts', 'src/test-utils/**/*.ts'],
+    files: [
+      'src/**/*.spec.ts',
+      'src/test-utils/**/*.ts',
+      'test/**/*.ts',
+    ],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
