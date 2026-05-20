@@ -137,7 +137,11 @@ describe('RessourcesService', () => {
 
       prisma.utilisateur.findUnique.mockResolvedValue({ role: 'CITOYEN' });
 
-      const result = await service.update(1, { titre: 'Titre modifie' } as any, 1);
+      const result = await service.update(
+        1,
+        { titre: 'Titre modifie' } as any,
+        1,
+      );
 
       expect(result.titre).toBe('Titre modifie');
       expect(prisma.ressource.update).toHaveBeenCalledWith(

@@ -35,7 +35,7 @@ export class UtilisateursController {
     if (!q || q.trim().length < 2) return [];
     return this.utilisateursService.searchForMessaging(q.trim());
   }
-  
+
   @Get(':id')
   findById(@Param('id', ParseIntPipe) id: number) {
     return this.utilisateursService.findById(id);
