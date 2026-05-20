@@ -1,4 +1,5 @@
 import { Body, Controller, Post, SetMetadata } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -10,6 +11,7 @@ import { Roles } from './roles.decorator';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @SetMetadata(IS_PUBLIC_KEY, true)
   @Post('login')
   login(@Body() body: LoginDto): Promise<LoginResponse> {

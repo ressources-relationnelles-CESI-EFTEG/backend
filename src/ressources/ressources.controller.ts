@@ -60,7 +60,10 @@ export class RessourcesController {
 
   @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.ressourcesService.remove(id);
+  remove(
+    @Req() req: { user: { userId: number; email: string } },
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.ressourcesService.remove(id, req.user.userId);
   }
 }
