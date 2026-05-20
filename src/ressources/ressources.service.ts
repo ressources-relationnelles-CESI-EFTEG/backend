@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import type { CreateRessourceDto } from './dto/create-ressource.dto';
 import type { UpdateRessourceDto } from './dto/update-ressource.dto';
@@ -58,8 +62,8 @@ export class RessourcesService {
 
   async create(dto: CreateRessourceDto) {
     return this.prisma.ressource.create({
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       data: {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         ...(dto as any),
         statut: 'EN_ATTENTE',
       },
@@ -88,7 +92,12 @@ export class RessourcesService {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data: any = isModo
       ? { ...(dto as any), dateModification: new Date() }
-      : { ...(dto as any), statut: 'EN_ATTENTE', motifRejet: null, dateModification: new Date() };
+      : {
+          ...(dto as any),
+          statut: 'EN_ATTENTE',
+          motifRejet: null,
+          dateModification: new Date(),
+        };
 
     return this.prisma.ressource.update({
       where: { idRessource: id },
