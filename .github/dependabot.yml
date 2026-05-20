@@ -1,6 +1,5 @@
 version: 2
 updates:
-  # Dépendances npm (NestJS, Prisma, etc.)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -13,7 +12,6 @@ updates:
       prefix: "chore(deps)"
       include: "scope"
 
-  # Actions GitHub utilisées dans la CI
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -24,7 +22,6 @@ updates:
     commit-message:
       prefix: "chore(ci)"
 
-  # Image de base du Dockerfile
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
