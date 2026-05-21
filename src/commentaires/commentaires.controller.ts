@@ -20,7 +20,7 @@ import { Roles } from '../auth/roles.decorator';
 export class CommentairesController {
   constructor(private readonly commentairesService: CommentairesService) {}
 
-  @ApiOperation({ summary: 'Lister les commentaires d\'une ressource' })
+  @ApiOperation({ summary: "Lister les commentaires d'une ressource" })
   @Get('ressource/:id')
   findByRessource(@Param('id', ParseIntPipe) id: number) {
     return this.commentairesService.findByRessource(id);

@@ -15,7 +15,7 @@ import { FavorisService } from './favoris.service';
 export class FavorisController {
   constructor(private readonly favorisService: FavorisService) {}
 
-  @ApiOperation({ summary: 'Lister les favoris d\'un utilisateur' })
+  @ApiOperation({ summary: "Lister les favoris d'un utilisateur" })
   @Get('utilisateur/:id')
   findByUtilisateur(@Param('id', ParseIntPipe) id: number) {
     return this.favorisService.findByUtilisateur(id);
