@@ -1,5 +1,15 @@
 # Ressources Relationnelles — Backend
 
+[![CI](https://github.com/ressources-relationnelles-CESI-EFTEG/backend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ressources-relationnelles-CESI-EFTEG/backend/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/ressources-relationnelles-CESI-EFTEG/backend/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/ressources-relationnelles-CESI-EFTEG/backend/actions/workflows/github-code-scanning/codeql)
+[![Latest Release](https://img.shields.io/github/v/release/ressources-relationnelles-CESI-EFTEG/backend?label=release&color=blue)](https://github.com/ressources-relationnelles-CESI-EFTEG/backend/releases)
+[![Licence Ouverte 2.0](https://img.shields.io/badge/Licence-Ouverte_2.0_(Etalab)-000091)](./LICENSE)
+
+![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma&logoColor=white)
+![Node](https://img.shields.io/badge/Node-20%2B-339933?logo=node.js&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+
 API REST NestJS pour la plateforme Ressources (Re)lationnelles. Gère l'authentification, les comptes utilisateurs, les ressources et leurs catégories / tags, les commentaires, les favoris, les progressions, les signalements, la messagerie interne et la gestion d'amitié.
 
 ## Prérequis
@@ -210,3 +220,11 @@ Tous les comptes utilisent le même mot de passe : `Password123!`
 | POST | `/progressions` | Créer une progression |
 | PATCH | `/progressions/:id` | Modifier une progression |
 | DELETE | `/progressions/:id` | Supprimer une progression |
+
+## Licence
+
+Ce projet est distribué sous **[Licence Ouverte 2.0 (Etalab)](./LICENSE)** — la licence officielle de l'État français pour les codes sources et données publiques, conçue pour le secteur public et compatible avec les licences CC-BY, ODC-BY et OGL.
+
+Vous pouvez librement réutiliser, modifier, redistribuer et exploiter ce code, y compris à des fins commerciales, sous la seule condition de mentionner la paternité (source : *Ressources Relationnelles — CESI EFTEG*) et la date de dernière mise à jour de l'information réutilisée.
+
+Choix motivé par le contexte ministériel du projet : la Licence Ouverte est notamment retenue par `data.gouv.fr`, Etalab, beta.gouv.fr et le SocialGouv.
