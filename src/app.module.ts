@@ -21,7 +21,12 @@ import { MessagerieModule } from './messagerie/messagerie.module';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60_000, limit: 10 }],
+      throttlers: [
+        {
+          ttl: Number(process.env.THROTTLE_TTL ?? 60_000),
+          limit: Number(process.env.THROTTLE_LIMIT ?? 10),
+        },
+      ],
     }),
     PrismaModule,
     AuthModule,

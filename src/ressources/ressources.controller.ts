@@ -44,7 +44,7 @@ export class RessourcesController {
     return this.ressourcesService.findById(id);
   }
 
-  @ApiOperation({ summary: 'Lister les ressources d\'un utilisateur' })
+  @ApiOperation({ summary: "Lister les ressources d'un utilisateur" })
   @Get('utilisateur/:id')
   findByUtilisateur(@Param('id', ParseIntPipe) id: number) {
     return this.ressourcesService.findByUtilisateur(id);

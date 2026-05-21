@@ -10,8 +10,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 
+  const corsOrigin = process.env.CORS_ORIGIN?.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean) ?? ['http://localhost:3000', 'http://localhost:3001'];
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true,
   });

@@ -48,7 +48,7 @@ export class UtilisateursController {
   }
 
   @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Modifier le statut d\'un utilisateur (admin)' })
+  @ApiOperation({ summary: "Modifier le statut d'un utilisateur (admin)" })
   @Patch(':id/statut')
   updateStatut(
     @Param('id', ParseIntPipe) id: number,
@@ -58,7 +58,7 @@ export class UtilisateursController {
   }
 
   @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Modifier le rôle d\'un utilisateur (admin)' })
+  @ApiOperation({ summary: "Modifier le rôle d'un utilisateur (admin)" })
   @Patch(':id/role')
   updateRole(
     @Param('id', ParseIntPipe) id: number,
@@ -67,7 +67,7 @@ export class UtilisateursController {
     return this.utilisateursService.updateRole(id, role);
   }
 
-  @ApiOperation({ summary: 'Mettre à jour le profil d\'un utilisateur' })
+  @ApiOperation({ summary: "Mettre à jour le profil d'un utilisateur" })
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -76,7 +76,7 @@ export class UtilisateursController {
     return this.utilisateursService.update(id, dto);
   }
 
-  @ApiOperation({ summary: 'Téléverser la photo de profil d\'un utilisateur' })
+  @ApiOperation({ summary: "Téléverser la photo de profil d'un utilisateur" })
   @Post(':id/photo')
   @UseInterceptors(
     FileInterceptor('photo', {
@@ -109,7 +109,7 @@ export class UtilisateursController {
     return this.utilisateursService.update(id, { photoProfil: photoPath });
   }
 
-  @ApiOperation({ summary: 'Supprimer la photo de profil d\'un utilisateur' })
+  @ApiOperation({ summary: "Supprimer la photo de profil d'un utilisateur" })
   @Delete(':id/photo')
   async deletePhoto(@Param('id', ParseIntPipe) id: number) {
     const user = await this.utilisateursService.findById(id);

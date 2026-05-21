@@ -29,20 +29,26 @@ export class SignalementsController {
   }
 
   @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Récupérer un signalement par son identifiant (modérateur)' })
+  @ApiOperation({
+    summary: 'Récupérer un signalement par son identifiant (modérateur)',
+  })
   @Get(':id')
   findById(@Param('id', ParseIntPipe) id: number) {
     return this.signalementsService.findById(id);
   }
 
-  @ApiOperation({ summary: 'Créer un signalement sur une ressource ou un commentaire' })
+  @ApiOperation({
+    summary: 'Créer un signalement sur une ressource ou un commentaire',
+  })
   @Post()
   create(@Body() dto: CreateSignalementDto) {
     return this.signalementsService.create(dto);
   }
 
   @Roles('MODERATEUR', 'ADMINISTRATEUR', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Mettre à jour le statut d\'un signalement (modérateur)' })
+  @ApiOperation({
+    summary: "Mettre à jour le statut d'un signalement (modérateur)",
+  })
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,

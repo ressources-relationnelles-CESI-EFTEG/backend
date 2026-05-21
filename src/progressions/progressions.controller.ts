@@ -20,7 +20,7 @@ import { UpdateProgressionDto } from './dto/update-progression.dto';
 export class ProgressionsController {
   constructor(private readonly progressionsService: ProgressionsService) {}
 
-  @ApiOperation({ summary: 'Lister les progressions d\'un utilisateur' })
+  @ApiOperation({ summary: "Lister les progressions d'un utilisateur" })
   @Get('utilisateur/:id')
   findByUtilisateur(
     @Param('id', ParseIntPipe) id: number,
