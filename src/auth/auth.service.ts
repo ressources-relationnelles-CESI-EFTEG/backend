@@ -100,8 +100,19 @@ export class AuthService {
     }
   }
 
+  private getTokenSecret(): string {
+    const secret = process.env.AUTH_TOKEN_SECRET;
+    if (!secret) {
+      throw new Error(
+        "La variable d'environnement AUTH_TOKEN_SECRET est obligatoire. " +
+          "Définissez-la dans votre fichier .env avant de démarrer l'application.",
+      );
+    }
+    return secret;
+  }
+
   verifyToken(token: string): { userId: number; email: string } | null {
-    const secret = process.env.AUTH_TOKEN_SECRET ?? 'dev-sign-in-secret';
+    const secret = this.getTokenSecret();
     const dotIndex = token.lastIndexOf('.');
     if (dotIndex === -1) return null;
 
@@ -122,7 +133,9 @@ export class AuthService {
       const userId = Number(userIdStr);
       if (!Number.isInteger(userId) || !email || !issuedAt) return null;
 
-      const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+      const TOKEN_TTL_MS = Number(
+        process.env.AUTH_TOKEN_EXPIRATION ?? 24 * 60 * 60 * 1000,
+      );
       if (Date.now() - issuedAt > TOKEN_TTL_MS) return null;
 
       return { userId, email };
@@ -155,7 +168,7 @@ export class AuthService {
   }
 
   private buildAccessToken(utilisateur: Utilisateur): string {
-    const secret = process.env.AUTH_TOKEN_SECRET ?? 'dev-sign-in-secret';
+    const secret = this.getTokenSecret();
     const payload = `${utilisateur.idUtilisateur}:${utilisateur.email}:${Date.now()}`;
     const payloadB64 = Buffer.from(payload).toString('base64url');
     const signature = createHmac('sha256', secret)

@@ -22,7 +22,7 @@ type AuthRequest = { user: { userId: number; email: string } };
 export class MessagerieController {
   constructor(private readonly messagerieService: MessagerieService) {}
 
-  @ApiOperation({ summary: 'Lister les conversations d\'un utilisateur' })
+  @ApiOperation({ summary: "Lister les conversations d'un utilisateur" })
   @Get('conversations/utilisateur/:id')
   findConversations(@Param('id', ParseIntPipe) id: number) {
     return this.messagerieService.findConversationsByUtilisateur(id);
@@ -34,13 +34,13 @@ export class MessagerieController {
     return this.messagerieService.findConversationById(id);
   }
 
-  @ApiOperation({ summary: 'Lister les messages d\'une conversation' })
+  @ApiOperation({ summary: "Lister les messages d'une conversation" })
   @Get('conversations/:id/messages')
   findMessages(@Param('id', ParseIntPipe) id: number) {
     return this.messagerieService.findMessages(id);
   }
 
-  @ApiOperation({ summary: 'Compter les messages non lus d\'un utilisateur' })
+  @ApiOperation({ summary: "Compter les messages non lus d'un utilisateur" })
   @Get('non-lus/:id')
   countUnread(@Param('id', ParseIntPipe) id: number) {
     return this.messagerieService.countUnread(id);
@@ -62,7 +62,9 @@ export class MessagerieController {
     return this.messagerieService.sendMessage(id, dto, req.user.userId);
   }
 
-  @ApiOperation({ summary: 'Marquer les messages d\'une conversation comme lus' })
+  @ApiOperation({
+    summary: "Marquer les messages d'une conversation comme lus",
+  })
   @Patch('conversations/:id/lu/:userId')
   markAsRead(
     @Param('id', ParseIntPipe) id: number,
@@ -80,7 +82,9 @@ export class MessagerieController {
     return this.messagerieService.leaveConversation(id, req.user.userId);
   }
 
-  @ApiOperation({ summary: 'Quitter une conversation (alias /participants/me)' })
+  @ApiOperation({
+    summary: 'Quitter une conversation (alias /participants/me)',
+  })
   @Delete('conversations/:id/participants/me')
   leaveConversationAlias(
     @Param('id', ParseIntPipe) id: number,

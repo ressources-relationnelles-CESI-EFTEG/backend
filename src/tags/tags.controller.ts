@@ -55,7 +55,7 @@ export class TagsController {
   }
 
   @Roles('ADMINISTRATEUR', 'SUPER_ADMIN')
-  @ApiOperation({ summary: 'Dissocier un tag d\'une ressource (admin)' })
+  @ApiOperation({ summary: "Dissocier un tag d'une ressource (admin)" })
   @Delete('ressource/:ressourceId/:tagId')
   removeFromRessource(
     @Param('ressourceId', ParseIntPipe) ressourceId: number,
