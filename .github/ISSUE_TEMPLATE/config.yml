@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Incident de sécurité
+    url: https://github.com/ressources-relationnelles-CESI-EFTEG/backend/security/advisories/new
+    about: "Pour une faille de sécurité, utiliser un avis de sécurité privé plutôt qu'une issue publique."
