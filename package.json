@@ -1,10 +1,10 @@
 {
   "name": "backend",
   "version": "0.0.1",
-  "description": "",
+  "description": "API REST NestJS de la plateforme Ressources Relationnelles",
   "author": "",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "etalab-2.0",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
