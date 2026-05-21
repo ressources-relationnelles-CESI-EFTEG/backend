@@ -31,6 +31,20 @@ describe('AuthService', () => {
   let service: AuthService;
   let prisma: PrismaMock;
 
+  // AUTH_TOKEN_SECRET est obligatoire depuis le retrait du fallback ;
+  // on le fixe pour la durée du test suite et on le restaure ensuite.
+  const originalTokenSecret = process.env.AUTH_TOKEN_SECRET;
+  beforeAll(() => {
+    process.env.AUTH_TOKEN_SECRET = 'test-token-secret-for-unit-tests';
+  });
+  afterAll(() => {
+    if (originalTokenSecret === undefined) {
+      delete process.env.AUTH_TOKEN_SECRET;
+    } else {
+      process.env.AUTH_TOKEN_SECRET = originalTokenSecret;
+    }
+  });
+
   beforeEach(async () => {
     resetFixtureIds();
     prisma = createPrismaMock();
