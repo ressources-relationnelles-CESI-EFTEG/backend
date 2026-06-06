@@ -254,11 +254,32 @@ Approche documentée — non exécutée dans ce projet scolaire :
 
 ## CI/CD
 
-Le workflow GitHub Actions (`.github/workflows/ci.yml`) est déclenché à chaque push sur `main` et `develop`. Il exécute les étapes suivantes dans l'ordre :
+### Stratégie GitFlow
+
+Le projet suit un GitFlow à **quatre branches d'intégration** :
+
+```
+feat/* | fix/* | chore/* | docs/*
+        │
+        ▼
+     develop ──► preprod ──► main
+```
+
+| Branche | Rôle | Déploiement |
+|---|---|---|
+| `develop` | Intégration des fonctionnalités terminées | Environnement de test / QA |
+| `preprod` | Stabilisation et validation finale avant production | Environnement de préproduction (déploiement automatique cible **roadmap V1.1**) |
+| `main` | Version stable de production, taguée par release | Environnement de production |
+
+Chaque fusion `develop → preprod` puis `preprod → main` passe par une pull request avec revue de code et validation des status checks.
+
+### Pipeline CI
+
+Le workflow GitHub Actions (`.github/workflows/ci.yml`) est déclenché à chaque push et pull request sur `main`, `preprod` et `develop`. Il exécute les étapes suivantes dans l'ordre :
 
 1. Lint (`eslint`)
 2. Tests unitaires (`npm run test`)
 3. Tests E2E (`npm run test:e2e`) — avec la base de données de test dockerisée
 4. Build de production (`npm run build`)
 
-Un push ne peut être fusionné sur `main` que si toutes les étapes passent (branch protection rules recommandées).
+Un push ne peut être fusionné sur `preprod` ou `main` que si toutes les étapes passent (branch protection rules configurées).
