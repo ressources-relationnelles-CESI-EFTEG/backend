@@ -132,7 +132,9 @@ docker compose -f docker-compose.prod.yml up -d api
 ### Étape 3 — Éradication
 
 ```bash
-# Corriger le code, créer une branche hotfix
+# Corriger le code, créer une branche hotfix depuis main
+git checkout main
+git pull origin main
 git checkout -b hotfix/<description-courte>
 # ... corrections dans src/ ...
 # ... ajouter tests de régression ...
@@ -150,6 +152,11 @@ docker compose -f docker-compose.prod.yml up -d --build api
 
 # Appliquer migrations si changements schéma
 docker compose -f docker-compose.prod.yml exec api npx prisma migrate deploy
+
+# Propager le correctif en aval (preprod et develop)
+# pour éviter qu'il ne soit écrasé au prochain merge normal
+git checkout preprod && git pull && git merge --no-ff origin/main && git push
+git checkout develop && git pull && git merge --no-ff origin/preprod && git push
 ```
 
 ### Étape 4 — Notification CNIL
