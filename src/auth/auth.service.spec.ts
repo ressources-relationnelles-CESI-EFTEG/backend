@@ -297,11 +297,11 @@ describe('AuthService', () => {
       expect(service.verifyToken('tokenSansPoint')).toBeNull();
     });
 
-    it('retourne null pour un token expire (> 24h)', () => {
+    it('retourne null pour un token expire (> 1h)', () => {
       const user = makeUser({ idUtilisateur: 1, email: 'old@example.com' });
       const { createHmac } = require('crypto');
       const secret = process.env.AUTH_TOKEN_SECRET ?? 'dev-sign-in-secret';
-      const oldTimestamp = Date.now() - 25 * 60 * 60 * 1000;
+      const oldTimestamp = Date.now() - 2 * 60 * 60 * 1000;
       const payload = `${user.idUtilisateur}:${user.email}:${oldTimestamp}`;
       const payloadB64 = Buffer.from(payload).toString('base64url');
       const sig = createHmac('sha256', secret).update(payloadB64).digest('hex');
