@@ -1,6 +1,15 @@
 # Plan de maintenance — Ressources Relationnelles Backend
 
-## Outil de ticketing : GitHub Issues + Projects
+## Outillage de gestion des évolutions
+
+Le suivi opérationnel s'appuie sur **deux outils complémentaires** :
+
+- **GitHub Issues + Projects** — catalogue technique des fonctionnalités, anomalies et tâches techniques. Chaque issue est liée nativement aux commits, branches et pull requests (closing keywords, mentions, références croisées) : la traçabilité code ↔ ticket est automatique. Les templates structurés (`.github/ISSUE_TEMPLATE/bug_report.md`, `feature_request.md`, `config.yml`) garantissent que chaque demande contient les informations nécessaires à son traitement.
+- **Trello** — pilotage opérationnel quotidien : visualisation kanban, priorisation visuelle, planification de sprint, répartition des assignations dans l'équipe. Les cartes Trello en cours référencent les issues GitHub correspondantes.
+
+Cette articulation découpe les responsabilités : GitHub Issues = **source de vérité technique** (lié au code), Trello = **vue de pilotage** (lié à l'équipe).
+
+## GitHub Issues + Projects — catalogue technique
 
 ### Labels recommandés
 
