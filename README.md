@@ -85,7 +85,7 @@ src/
 ## Authentification
 
 Token JWT HMAC-SHA256 personnalisé : `base64url(userId:email:timestamp).signature`
-- Expiration : 24 h
+- Expiration : 1 h
 - Header requis : `Authorization: Bearer <token>`
 - Rôles : `CITOYEN`, `MODERATEUR`, `ADMINISTRATEUR`, `SUPER_ADMIN`
 
