@@ -96,10 +96,10 @@ cp .env.example .env.production
 #   PORT=3001
 #   DATABASE_URL=postgresql://rr_user:motdepassefort@db:5432/rr_prod
 #   AUTH_TOKEN_SECRET=<secret-fort-64-chars-via-openssl>
-#   AUTH_TOKEN_EXPIRATION=24
-#   CORS_ORIGIN=http://localhost:3000
-#   THROTTLE_TTL=60
-#   THROTTLE_LIMIT=20
+#   AUTH_TOKEN_EXPIRATION=3600000        # 1 h, en millisecondes
+#   CORS_ORIGIN=https://votre-domaine-prod.fr
+#   THROTTLE_TTL=60000                   # 60 s, en millisecondes
+#   THROTTLE_LIMIT=10
 #   THROTTLE_AUTH_LIMIT=5
 #   SWAGGER_ENABLED=false
 #   POSTGRES_USER=rr_user
@@ -146,10 +146,10 @@ Comptes créés par le seed :
 | `POSTGRES_PASSWORD` | Mot de passe PostgreSQL | Oui | — |
 | `POSTGRES_DB` | Nom de la base de données | Oui | — |
 | `AUTH_TOKEN_SECRET` | Clé secrète pour signer les tokens JWT (HMAC-SHA256) — min 64 caractères | Oui | — |
-| `AUTH_TOKEN_EXPIRATION` | Durée de validité des tokens en heures | Non | 24 |
-| `CORS_ORIGIN` | Origine autorisée pour les requêtes CORS (ex. `http://localhost:3000`) | Oui | — |
-| `THROTTLE_TTL` | Fenêtre de rate-limiting en secondes | Non | 60 |
-| `THROTTLE_LIMIT` | Requêtes max par fenêtre (endpoints globaux) | Non | 20 |
+| `AUTH_TOKEN_EXPIRATION` | Durée de validité des tokens en millisecondes | Non | 3600000 (1 h) |
+| `CORS_ORIGIN` | Origines autorisées pour les requêtes CORS (CSV, ex. `http://localhost:3000,http://localhost:3001`) | Oui | — |
+| `THROTTLE_TTL` | Fenêtre de rate-limiting en millisecondes | Non | 60000 (60 s) |
+| `THROTTLE_LIMIT` | Requêtes max par fenêtre (endpoints globaux) | Non | 10 |
 | `THROTTLE_AUTH_LIMIT` | Requêtes max par fenêtre (endpoints `/auth/*`) | Non | 5 |
 | `SWAGGER_ENABLED` | Expose la documentation OpenAPI sur `/api/docs` | Non | true |
 
