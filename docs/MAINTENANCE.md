@@ -98,29 +98,47 @@ Structure recommandée (vue Kanban) :
 
 ### 3 — Correction
 
+Un hotfix vise la mise en production rapide d'un correctif critique. Il **court-circuite le flux normal** (`develop → preprod → main`) en branchant directement depuis `main`, puis se propage en aval pour garder les branches synchronisées.
+
 ```bash
-# Créer une branche hotfix depuis main
+# 1. Créer une branche hotfix depuis main
 git checkout main
 git pull origin main
 git checkout -b hotfix/<description-courte>
 
-# Développer le correctif dans src/
+# 2. Développer le correctif dans src/
 # ... modifications ...
 
-# Écrire ou adapter les tests (unitaires + E2E si modifie endpoint)
+# 3. Écrire ou adapter les tests (unitaires + E2E si modifie endpoint)
 npm run test
 npm run test:cov
 npm run test:e2e
 
-# Pousser et ouvrir une Pull Request vers main
+# 4. Pousser et ouvrir une Pull Request vers main
 git push origin hotfix/<description-courte>
 gh pr create --base main --title "hotfix(<module>): <description>"
 ```
 
-La PR doit :
+La PR vers `main` doit :
 - Passer tous les checks CI (lint + tests unitaires + E2E + build).
 - Être approuvée par au moins un autre membre si possible.
 - Être mergée en **squash merge** ou **rebase merge** pour historique lisible.
+
+```bash
+# 5. Une fois mergé sur main, propager en aval pour synchroniser
+#    preprod et develop avec le correctif :
+git checkout preprod
+git pull origin preprod
+git merge --no-ff origin/main -m "chore: back-merge hotfix from main"
+git push origin preprod
+
+git checkout develop
+git pull origin develop
+git merge --no-ff origin/preprod -m "chore: sync develop with preprod"
+git push origin develop
+```
+
+Cette propagation évite que le hotfix ne soit « écrasé » au prochain merge `develop → preprod → main`.
 
 ### 4 — Post-mortem
 
