@@ -134,7 +134,7 @@ export class AuthService {
       if (!Number.isInteger(userId) || !email || !issuedAt) return null;
 
       const TOKEN_TTL_MS = Number(
-        process.env.AUTH_TOKEN_EXPIRATION ?? 24 * 60 * 60 * 1000,
+        process.env.AUTH_TOKEN_EXPIRATION ?? 60 * 60 * 1000,
       );
       if (Date.now() - issuedAt > TOKEN_TTL_MS) return null;
 
