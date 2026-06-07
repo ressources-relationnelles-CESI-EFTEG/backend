@@ -4,12 +4,12 @@
 
 Le suivi opérationnel s'appuie sur **deux outils complémentaires** :
 
-- **GitHub Issues + Projects** — catalogue technique des fonctionnalités, anomalies et tâches techniques. Chaque issue est liée nativement aux commits, branches et pull requests (closing keywords, mentions, références croisées) : la traçabilité code ↔ ticket est automatique. Les templates structurés (`.github/ISSUE_TEMPLATE/bug_report.md`, `feature_request.md`, `config.yml`) garantissent que chaque demande contient les informations nécessaires à son traitement.
+- **GitHub Issues** — catalogue technique des fonctionnalités, anomalies et tâches techniques. Chaque issue est liée nativement aux commits, branches et pull requests (closing keywords, mentions, références croisées) : la traçabilité code ↔ ticket est automatique. Les templates structurés (`.github/ISSUE_TEMPLATE/bug_report.md`, `feature_request.md`, `config.yml`) garantissent que chaque demande contient les informations nécessaires à son traitement. Les **GitHub Milestones** sont utilisées pour le suivi par release (ex. `v1.0.0`, `v1.1.0`).
 - **Trello** — pilotage opérationnel quotidien : visualisation kanban, priorisation visuelle, planification de sprint, répartition des assignations dans l'équipe. Les cartes Trello en cours référencent les issues GitHub correspondantes.
 
 Cette articulation découpe les responsabilités : GitHub Issues = **source de vérité technique** (lié au code), Trello = **vue de pilotage** (lié à l'équipe).
 
-## GitHub Issues + Projects — catalogue technique
+## GitHub Issues — catalogue technique
 
 ### Labels recommandés
 
@@ -48,9 +48,16 @@ Cette articulation découpe les responsabilités : GitHub Issues = **source de v
 
 **Security report** — contacter DPO plutôt qu'issue publique.
 
-### GitHub Project board
+### Milestones et tri
 
-Structure recommandée (vue Kanban) :
+- Chaque issue est associée à une **Milestone GitHub** (ex. `v0.2.0`, `v0.3.0`) pour suivre l'avancement par release et fixer des échéances.
+- Les labels `priority:*` et `module:*` facilitent le tri et l'assignation dans la vue liste d'issues comme dans le filtre Trello.
+
+## Trello — pilotage opérationnel
+
+Le tableau Kanban opérationnel est hébergé sur **Trello**. Chaque carte Trello référence l'issue GitHub correspondante (URL en commentaire ou description) pour garder le lien code ↔ ticket et permettre les retours croisés (commit fermant l'issue ↔ carte avançant de colonne).
+
+Structure de colonnes :
 
 ```
 ┌──────────┬──────────────┬───────────┬──────┐
@@ -61,9 +68,7 @@ Structure recommandée (vue Kanban) :
 └──────────┴──────────────┴───────────┴──────┘
 ```
 
-- Chaque issue est associée à une **Milestone** (ex. `v0.2.0`, `v0.3.0`).
-- Les Milestones permettent de suivre l'avancement par release et de définir des échéances.
-- Labels `priority:*` et `module:*` facilitent le tri et l'assignation.
+L'équipe consulte Trello pour le suivi quotidien (stand-up, priorisation, drag-and-drop visuel) et GitHub Issues pour la rigueur technique (formulaires structurés, recherche full-text, intégration au code).
 
 ---
 
