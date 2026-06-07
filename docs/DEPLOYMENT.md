@@ -16,7 +16,7 @@
         └────────────────────────────────────────────────────┘
 ```
 
-> Les trois repos (`backend`, `frontend-nuxt`, `mobile-flutter`) sont des projets Git indépendants.
+> Les trois repos (`backend`, `frontend`, `mobile`) sont des projets Git indépendants.
 > Le backend expose une API REST documentée via Swagger (`/api` — activable via `SWAGGER_ENABLED`).
 
 ---
@@ -198,7 +198,7 @@ git tag --sort=-version:refname | head -10
 git checkout v0.1.0
 
 # Redéployer
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 
 # Appliquer les migrations si changements de schéma entre les versions
 docker compose -f docker-compose.prod.yml exec api npx prisma migrate deploy
@@ -238,7 +238,7 @@ set -euo pipefail
 cd /path/to/backend
 
 # Export des variables d'environnement
-export $(grep -v '^#' .env.production | xargs)
+export $(grep -v '^#' .env.prod | xargs)
 
 # Sauvegarde
 docker compose -f docker-compose.prod.yml exec -T db \
@@ -262,7 +262,7 @@ Approche documentée — non exécutée dans ce projet scolaire :
    docker build -t ghcr.io/ressources-relationnelles-CESI-EFTEG/backend:latest .
    docker push ghcr.io/ressources-relationnelles-CESI-EFTEG/backend:latest
    ```
-4. **Sur le VPS** : cloner le repo, copier `.env.production`, puis :
+4. **Sur le VPS** : cloner le repo, copier `.env.prod`, puis :
    ```bash
    docker compose -f docker-compose.prod.yml pull
    docker compose -f docker-compose.prod.yml up -d
