@@ -42,6 +42,13 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# Fichiers d'env Docker par environnement (valeurs réelles ignorées,
+# les .example sont versionnés comme modèles)
+.env.preprod
+.env.prod
+!.env.preprod.example
+!.env.prod.example
+
 # temp directory
 .temp
 .tmp
