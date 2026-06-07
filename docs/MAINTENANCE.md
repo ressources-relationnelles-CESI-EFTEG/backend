@@ -277,7 +277,7 @@ Cet endpoint est **public** (hors authentification) et doit rester accessible en
      tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
    });
    ```
-5. Ajouter `SENTRY_DSN` dans `.env.production`.
+5. Ajouter `SENTRY_DSN` dans `.env.prod`.
 
 ### Logs via stdout (NestJS natif)
 
@@ -308,7 +308,7 @@ Avant tout déploiement en production :
 - [ ] Changelog mis à jour (`docs/CHANGELOG.md`).
 - [ ] Git tag créé avec version sémantique (`git tag v0.2.0`).
 - [ ] Image Docker construite et testée localement.
-- [ ] `.env.production` préparé avec secrets forts.
+- [ ] `.env.prod` préparé avec secrets forts (depuis `.env.prod.example`).
 - [ ] Sauvegarde BDD actuelle effectuée.
 - [ ] Procédure rollback testée (avoir tag précédent accessible).
 - [ ] Team notifiée du déploiement (heure, durée estimée, plan rollback).

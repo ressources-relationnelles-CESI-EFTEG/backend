@@ -1,0 +1,39 @@
+# Dépendances et builds locaux — réinstallés à chaque build
+node_modules
+dist
+coverage
+.nyc_output
+
+# Variables d'environnement locales — JAMAIS dans l'image
+.env
+.env.*
+!.env.example
+!.env.preprod.example
+!.env.prod.example
+
+# Git et CI
+.git
+.github
+.gitignore
+.gitattributes
+
+# Éditeurs et IDE
+.vscode
+.idea
+.fleet
+*.swp
+*.swo
+
+# Documentation et tests (pas nécessaires à l'exécution)
+docs
+test
+*.md
+!README.md
+
+# Uploads locaux (le volume Compose s'occupe de la persistance)
+uploads
+
+# Logs et données diagnostiques
+logs
+*.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

@@ -1,0 +1,63 @@
+# Stack de pré-production — API NestJS + PostgreSQL.
+# Lecture des secrets dans .env.preprod (non commité, à créer depuis
+# .env.preprod.example). Voir docs/DEPLOYMENT.md pour la procédure.
+#
+# Démarrage :
+#   docker compose -f docker-compose.preprod.yml --env-file .env.preprod up -d
+#
+# Migrations Prisma à appliquer après le premier démarrage :
+#   docker compose -f docker-compose.preprod.yml exec api npx prisma migrate deploy
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rr-backend:preprod
+    container_name: rr-api-preprod
+    restart: unless-stopped
+    env_file: .env.preprod
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    volumes:
+      - api_uploads_preprod:/app/uploads
+    networks:
+      - rr-preprod
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  db:
+    image: postgres:16-alpine
+    container_name: rr-db-preprod
+    restart: unless-stopped
+    env_file: .env.preprod
+    # Port BDD non exposé sur l'hôte — accès uniquement depuis le réseau interne.
+    # Pour des inspections ponctuelles : `docker compose ... exec db psql ...`.
+    volumes:
+      - postgres_preprod:/var/lib/postgresql/data
+    networks:
+      - rr-preprod
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_preprod:
+    name: rr-postgres-preprod
+  api_uploads_preprod:
+    name: rr-api-uploads-preprod
+
+networks:
+  rr-preprod:
+    name: rr-preprod-net

@@ -120,8 +120,8 @@ docker compose -f docker-compose.prod.yml stop api
 # 1. Générer un nouveau secret fort
 openssl rand -base64 64
 
-# 2. Mettre à jour .env.production
-# AUTH_TOKEN_SECRET=<nouveau-secret-forte>
+# 2. Mettre à jour .env.prod
+# AUTH_TOKEN_SECRET=<nouveau-secret-fort>
 
 # 3. Redémarrer uniquement l'API
 docker compose -f docker-compose.prod.yml up -d api
@@ -186,8 +186,8 @@ Rotation **immédiate** en cas de suspicion de compromission.
 openssl rand -base64 64
 # Exemple : VWc3pqL9Ky8mN2jX5zR0fB7tH4vD6wJ1sE3cP9lQ2xM8nY6oI0aK5uG7bF3dC4eL9jH
 
-# 2. Mettre à jour .env.production
-nano .env.production
+# 2. Mettre à jour .env.prod
+nano .env.prod
 #    AUTH_TOKEN_SECRET=<nouvelle-valeur>
 
 # 3. Redémarrer l'API (invalide tous les tokens existants)
@@ -209,8 +209,9 @@ openssl rand -base64 32
 docker compose -f docker-compose.prod.yml exec db \
   psql -U $POSTGRES_USER -c "ALTER USER $POSTGRES_USER PASSWORD '<nouveau-mdp>';"
 
-# 3. Mettre à jour DATABASE_URL et POSTGRES_PASSWORD dans .env.production
-nano .env.production
+# 3. Mettre à jour POSTGRES_PASSWORD dans .env.prod (DATABASE_URL est
+#    construite automatiquement à partir des POSTGRES_* au démarrage du compose)
+nano .env.prod
 
 # 4. Redémarrer l'API
 docker compose -f docker-compose.prod.yml restart api
