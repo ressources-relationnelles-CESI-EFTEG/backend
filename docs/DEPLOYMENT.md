@@ -75,54 +75,77 @@ npm run test:ci
 
 ---
 
-## Déploiement local (production-like)
+## Environnements Docker — 3 stacks alignées sur le GitFlow
 
-### 1. Créer le réseau partagé (une seule fois)
+Le repo fournit **quatre fichiers Docker Compose** dédiés, un par
+environnement, alignés sur le GitFlow `develop → preprod → main` :
 
-```bash
-docker network create rr-net
-```
+| Fichier | Environnement | Branche source | Contenu |
+|---|---|---|---|
+| `docker-compose.yml` | **dev** (local) | `develop` (working tree) | PostgreSQL seul, port 5433. L'API tourne en local via `npm run start:dev` pour bénéficier du hot reload. |
+| `docker-compose.test.yml` | **test** (CI + e2e locaux) | branches de feature | PostgreSQL seul, port 5434. Lancé par la suite e2e (`npm run test:db:up`). |
+| `docker-compose.preprod.yml` | **pré-production** | `preprod` | API NestJS containerisée + PostgreSQL, sur le réseau `rr-preprod-net`. Lecture des secrets depuis `.env.preprod`. |
+| `docker-compose.prod.yml` | **production** | `main` | API NestJS containerisée + PostgreSQL, hardening (port db non exposé, exposition API uniquement sur `127.0.0.1`, `restart: always`, log rotation), sur le réseau `rr-prod-net`. Lecture des secrets depuis `.env.prod`. |
 
-### 2. Déployer le backend
+Le `Dockerfile` à la racine est un **multi-stage** (builder + runtime) :
+- **Builder** : `node:20-alpine`, `npm ci`, `prisma generate`, `nest build`,
+  `npm prune --omit=dev` pour ne garder que les dépendances de production.
+- **Runtime** : `node:20-alpine` + `dumb-init` (propagation correcte de
+  SIGTERM/SIGINT), utilisateur non-root `node`, healthcheck interne sur
+  `GET /health`.
+
+### Démarrage dev (local, hot reload)
 
 ```bash
 cd backend
+cp .env.example .env
+# Éditer .env (au minimum AUTH_TOKEN_SECRET)
 
-# Copier et configurer les variables d'environnement
-cp .env.example .env.production
-
-# Éditer .env.production avec des valeurs fortes :
-#   NODE_ENV=production
-#   PORT=3001
-#   DATABASE_URL=postgresql://rr_user:motdepassefort@db:5432/rr_prod
-#   AUTH_TOKEN_SECRET=<secret-fort-64-chars-via-openssl>
-#   AUTH_TOKEN_EXPIRATION=3600000        # 1 h, en millisecondes
-#   CORS_ORIGIN=https://votre-domaine-prod.fr
-#   THROTTLE_TTL=60000                   # 60 s, en millisecondes
-#   THROTTLE_LIMIT=10
-#   THROTTLE_AUTH_LIMIT=5
-#   SWAGGER_ENABLED=false
-#   POSTGRES_USER=rr_user
-#   POSTGRES_PASSWORD=<mot-de-passe-fort>
-#   POSTGRES_DB=rr_prod
-
-# Construire et démarrer
-docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+npm install
+npm run db:up                            # démarre Postgres sur 5433
+npx prisma migrate deploy                # applique les migrations
+npm run start:dev                        # API NestJS sur http://localhost:3001
 ```
 
-> Les migrations Prisma sont appliquées automatiquement au démarrage via `docker-entrypoint.sh`.
+### Démarrage pré-production
 
-### 3. Déployer le frontend et l'app mobile
+```bash
+cd backend
+cp .env.preprod.example .env.preprod
+# Éditer .env.preprod (AUTH_TOKEN_SECRET fort, mots de passe BDD, domaine CORS)
 
-Voir `frontend-nuxt/docs/DEPLOYMENT.md` et `mobile-flutter/docs/DEPLOYMENT.md`.
+docker compose -f docker-compose.preprod.yml --env-file .env.preprod up -d --build
 
-### 4. Seed — données de démonstration (optionnel)
+# Appliquer les migrations Prisma sur la BDD preprod
+docker compose -f docker-compose.preprod.yml exec api npx prisma migrate deploy
+
+# (optionnel) Seed des comptes de démonstration
+docker compose -f docker-compose.preprod.yml exec api npm run seed
+```
+
+### Démarrage production
+
+```bash
+cd backend
+cp .env.prod.example .env.prod
+# Éditer .env.prod (secrets forts, SWAGGER_ENABLED=false, domaine prod en CORS)
+
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+
+# Migrations
+docker compose -f docker-compose.prod.yml exec api npx prisma migrate deploy
+```
+
+En production, l'API est exposée uniquement sur `127.0.0.1:3001` — un
+reverse-proxy (nginx ou traefik) en amont termine TLS et route le trafic
+public. PostgreSQL n'est exposé sur aucun port externe (accès uniquement
+via le réseau interne `rr-prod-net`).
+
+### Comptes de démonstration créés par le seed
 
 ```bash
 docker compose -f docker-compose.prod.yml exec api npm run seed
 ```
-
-Comptes créés par le seed :
 
 | Rôle | Email | Mot de passe |
 |------|-------|--------------|
@@ -131,7 +154,7 @@ Comptes créés par le seed :
 | Modérateur | moderateur@rr.local | Password123! |
 | Citoyen | citoyen@rr.local | Password123! |
 
-> En production, modifier obligatoirement ces mots de passe.
+> En production, modifier obligatoirement ces mots de passe (ou ne pas exécuter le seed).
 
 ---
 
