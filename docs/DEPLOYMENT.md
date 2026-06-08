@@ -3,21 +3,27 @@
 ## Architecture générale
 
 ```
-                        Réseau Docker : rr-net
-        ┌────────────────────────────────────────────────────┐
-        │                                                    │
-[Mobile Flutter] ─┐                                          │
-                  ├──→ [Frontend Nuxt :3000] ──→ [Backend NestJS :3001] ──→ [PostgreSQL :5432]
-[Browser]    ────┘                                                │                 │
-                                                        src/: 11 modules      service "db"
-                                                        (auth, utilisateurs,  (docker-
-                                                         ressources, etc.)    compose)
-        │                                                    │
-        └────────────────────────────────────────────────────┘
+                                  Réseau Docker : rr-{env}-net
+                      ┌─────────────────────────────────────────────────────┐
+                      │                                                     │
+[Navigateur]  ─HTTPS──┼──→ [Frontend Nuxt SSR :3000]                        │
+                      │              │                                      │
+                      │              │ HTTP interne                         │
+                      │              ▼                                      │
+[Mobile Flutter] ─HTTPS──→  [Backend NestJS :3001] ──→ [PostgreSQL :5432]   │
+                      │      (11 modules métier)         service "db"       │
+                      │       auth, utilisateurs,        (docker-compose)   │
+                      │       ressources, etc.                              │
+                      │                                                     │
+                      └─────────────────────────────────────────────────────┘
 ```
 
 > Les trois repos (`backend`, `frontend`, `mobile`) sont des projets Git indépendants.
 > Le backend expose une API REST documentée via Swagger (`/api` — activable via `SWAGGER_ENABLED`).
+> **Le client mobile Flutter consomme l'API directement** (pas via le frontend Nuxt) — il
+> entre dans le réseau Docker au niveau de NestJS, exactement au même point que les requêtes
+> server-side du frontend. Le navigateur web, lui, passe par Nuxt qui fait du rendu SSR puis
+> appelle l'API en interne.
 
 ---
 
