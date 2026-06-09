@@ -297,7 +297,7 @@ feat/* | fix/* | chore/* | docs/*
 | Branche | Rôle | Déploiement |
 |---|---|---|
 | `develop` | Intégration des fonctionnalités terminées | Environnement de test / QA |
-| `preprod` | Stabilisation et validation finale avant production | Environnement de préproduction (déploiement automatique cible **roadmap V1.1**) |
+| `preprod` | Stabilisation et validation finale avant production | Environnement de préproduction (déploiement automatique cible **roadmap V1.2.0**) |
 | `main` | Version stable de production, taguée par release | Environnement de production |
 
 Chaque fusion `develop → preprod` puis `preprod → main` passe par une pull request avec revue de code et validation des status checks.
