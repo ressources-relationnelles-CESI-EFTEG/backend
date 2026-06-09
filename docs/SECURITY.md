@@ -19,22 +19,22 @@
 
 ## Matrice des risques (probabilité × impact)
 
-Échelle : Faible (1) · Moyen (2) · Élevé (3). **Criticité = Probabilité × Impact.**
+Échelle : Probabilité et Impact notés de 1 à 5. Criticité = Probabilité × Impact. Bandes : 1–5 Faible · 6–9 Moyen · 10–15 Élevé · 16–25 Critique.
 
 | # | Risque / vulnérabilité | Probabilité | Impact | Criticité | Action préventive | Action corrective |
 |---|---|:---:|:---:|:---:|---|---|
-| R1 | Vol de token JWT via XSS (stocké en `localStorage` côté frontend) | Moyen | Élevé | 6 | `helmet` + CSP stricte, validation inputs côté backend, expiration 1 h | Rotation du `AUTH_TOKEN_SECRET` (invalide tous tokens), patch XSS côté frontend |
-| R2 | Attaque brute-force sur `/auth/sign-in` | Élevé | Moyen | 6 | `ThrottlerGuard` 5 req/min sur `/auth/*`, politique mot de passe forte (12 chars + complexité) | Blocage temporaire de l'IP, analyse logs, notification utilisateur |
-| R3 | Injection SQL | Faible | Élevé | 3 | Prisma ORM (requêtes paramétrées), `ValidationPipe` strict, pas d'interpolation manuelle | Patch d'urgence, audit requêtes Prisma, revue de code |
-| R4 | Élévation de privilège (accès admin non autorisé) | Faible | Élevé | 3 | `AuthGuard` + `RolesGuard` globaux, vérification ownership, décorateurs `@Roles()` explicites | Révocation tokens, audit `audit_log`, downgrade rôle utilisateur |
-| R5 | Fuite de secrets (`.env` committé par erreur) | Moyen | Élevé | 6 | `.gitignore` strict, `.env.example` sans valeurs réelles, secrets en CI uniquement (GitHub Secrets) | Rotation immédiate de tous secrets exposés (`AUTH_TOKEN_SECRET`, credentials DB) |
-| R6 | Dépendance npm vulnérable | Moyen | Moyen | 4 | `npm audit` hebdomadaire, Dependabot activé, mises à jour 48 h | Mise à jour ou remplacement dépendance, re-test complet |
-| R7 | Indisponibilité du service (panne serveur / BDD) | Moyen | Élevé | 6 | Healthcheck Docker, `restart: unless-stopped`, sauvegardes `pg_dump` quotidiennes | Rollback via git tag, restauration backup BDD |
-| R8 | Perte de données (corruption / suppression accidentelle) | Faible | Élevé | 3 | Sauvegardes automatiques, volume Docker persistant, tests de restauration mensuels | Restauration du dernier backup sain, investigation cause |
-| R9 | Accès non autorisé à la messagerie privée | Faible | Élevé | 3 | Vérification propriété conversation avant lecture/modification, `RolesGuard` sur endpoints messagerie | Audit logs, notification utilisateurs, blocage compte suspect |
-| R10 | Signalement de faux contenu (spam) | Moyen | Moyen | 4 | Rate-limiting global, modération humaine via admin panel, historique signalements | Bannissement utilisateur abusif, suppression ressource, notif modérateurs |
+| R1 | Vol de token JWT via XSS (stocké en `localStorage` côté frontend) | 3 | 5 | 15 — Élevé | `helmet` + CSP stricte, validation inputs côté backend, expiration 1 h | Rotation du `AUTH_TOKEN_SECRET` (invalide tous tokens), patch XSS côté frontend |
+| R2 | Attaque brute-force sur `/auth/sign-in` | 4 | 3 | 12 — Élevé | `ThrottlerGuard` 5 req/min sur `/auth/*`, politique mot de passe forte (12 chars + complexité) | Blocage temporaire de l'IP, analyse logs, notification utilisateur |
+| R3 | Injection SQL | 3 | 5 | 15 — Élevé | Prisma ORM (requêtes paramétrées), `ValidationPipe` strict, pas d'interpolation manuelle | Patch d'urgence, audit requêtes Prisma, revue de code |
+| R4 | Élévation de privilège (accès admin non autorisé) | 4 | 5 | 20 — Critique | `AuthGuard` + `RolesGuard` globaux, vérification ownership, décorateurs `@Roles()` explicites | Révocation tokens, audit `audit_log`, downgrade rôle utilisateur |
+| R5 | Fuite de secrets (`.env` committé par erreur) | 2 | 5 | 10 — Élevé | `.gitignore` strict, `.env.example` sans valeurs réelles, secrets en CI uniquement (GitHub Secrets) | Rotation immédiate de tous secrets exposés (`AUTH_TOKEN_SECRET`, credentials DB) |
+| R6 | Dépendance npm vulnérable | 3 | 3 | 9 — Moyen | `npm audit` hebdomadaire, Dependabot activé, mises à jour 48 h | Mise à jour ou remplacement dépendance, re-test complet |
+| R7 | Indisponibilité du service (panne serveur / BDD) | 3 | 4 | 12 — Élevé | Healthcheck Docker, `restart: unless-stopped`, sauvegardes `pg_dump` quotidiennes | Rollback via git tag, restauration backup BDD |
+| R8 | Perte de données (corruption / suppression accidentelle) | 2 | 5 | 10 — Élevé | Sauvegardes automatiques, volume Docker persistant, tests de restauration mensuels | Restauration du dernier backup sain, investigation cause |
+| R9 | Accès non autorisé à la messagerie privée | 3 | 4 | 12 — Élevé | Vérification propriété conversation avant lecture/modification, `RolesGuard` sur endpoints messagerie | Audit logs, notification utilisateurs, blocage compte suspect |
+| R10 | Signalement de faux contenu (spam) | 2 | 2 | 4 — Faible | Rate-limiting global, modération humaine via admin panel, historique signalements | Bannissement utilisateur abusif, suppression ressource, notif modérateurs |
 
-> Les risques de criticité ≥ 6 sont traités en priorité et réévalués lors de la revue de sécurité annuelle (voir `MAINTENANCE.md`).
+> Les risques de criticité ≥ 10 (Élevé et Critique) sont traités en priorité et réévalués lors de la revue de sécurité annuelle (voir `MAINTENANCE.md`).
 
 ---
 
