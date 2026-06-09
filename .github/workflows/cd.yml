@@ -1,0 +1,52 @@
+name: CD — Publish Docker image
+
+# Déclenché au merge sur main / preprod, et sur les tags de version (v1.0.0…).
+# Construit l'image Docker et la pousse sur GitHub Container Registry (ghcr.io).
+# Aucun déploiement en aval : l'image publiée est un artefact prêt à déployer.
+on:
+  push:
+    branches: [main, preprod]
+    tags: ['v*']
+
+permissions:
+  contents: read
+  packages: write        # suffit pour pousser sur GHCR avec le GITHUB_TOKEN
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Connexion à GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}   # fourni automatiquement, aucun secret à configurer
+
+      - name: Métadonnées (tags + labels de l'image)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # Nom d'image dérivé du repo : ghcr.io/<org>/<repo> (mis en minuscules automatiquement)
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch                              # -> main, preprod
+            type=semver,pattern={{version}}                    # -> 1.0.0 si tag git v1.0.0
+            type=sha,format=short                              # -> sha-abc1234 (traçabilité)
+            type=raw,value=latest,enable={{is_default_branch}} # -> latest, uniquement sur main
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .          # Dockerfile à la racine du repo (backend / frontend)
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
