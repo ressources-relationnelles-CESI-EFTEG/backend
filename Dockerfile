@@ -4,7 +4,7 @@
 # Stage 1 — Builder
 # Compile TypeScript NestJS et génère le client Prisma.
 # -----------------------------------------------------------------------------
-FROM node:20-alpine AS builder
+FROM node:25-alpine AS builder
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ RUN npm prune --omit=dev
 # Stage 2 — Runtime
 # Image minimale qui exécute l'API compilée.
 # -----------------------------------------------------------------------------
-FROM node:20-alpine AS runtime
+FROM node:25-alpine AS runtime
 
 ENV NODE_ENV=production
 
